@@ -11,7 +11,7 @@
   },
   "keywords": ["lsp", "language-server-protocol"],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "type": "commonjs",
   "dependencies": {
     "vscode-jsonrpc": "^8.2.1",

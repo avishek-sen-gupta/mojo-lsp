@@ -102,4 +102,4 @@ npm run clean
 
 ## License
 
-ISC
+MIT
