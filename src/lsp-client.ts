@@ -212,7 +212,7 @@ export class LSPClient {
       },
     };
 
-    this.connection.sendNotification(DidOpenTextDocumentNotification.type, params);
+    return this.connection.sendNotification(DidOpenTextDocumentNotification.type, params);
   }
 
   async changeDocument(uri: string, text: string): Promise<void> {
