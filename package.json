@@ -1,0 +1,24 @@
+{
+  "name": "mojo-lsp",
+  "version": "1.0.0",
+  "description": "Generic LSP client using vscode-languageserver-node",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "example": "tsc && node dist/example.js",
+    "clean": "rm -rf dist"
+  },
+  "keywords": ["lsp", "language-server-protocol"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "vscode-jsonrpc": "^8.2.1",
+    "vscode-languageserver-protocol": "^3.17.5"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.10",
+    "typescript": "^5.9.3"
+  }
+}
