@@ -79,7 +79,7 @@ console.log(greeting);
     if (symbols && symbols.length > 0) {
       console.log('\nDocument symbols:');
       for (const sym of symbols) {
-        console.log(`  - ${sym.name}`);
+        console.log(`  - ${JSON.stringify(sym)}`);
       }
     }
 
