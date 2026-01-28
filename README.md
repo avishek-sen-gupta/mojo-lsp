@@ -142,6 +142,45 @@ For best results with clangd, generate `compile_commands.json` in your project:
 cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
 ```
 
+### COBOL Example
+
+```bash
+# The Che4z COBOL Language Server requires Java and uses socket communication
+# Build the server JAR first (see Che4z documentation)
+
+# Run the COBOL example (connects to server on port 1044)
+npx tsx src/cobol-example.ts
+```
+
+The COBOL example demonstrates:
+- Connecting to Che4z COBOL Language Server via socket (port 1044)
+- Opening COBOL source files (.cbl, .cob)
+- Getting document symbols (divisions, sections, paragraphs, variables)
+- Getting definitions and go-to-definition for PERFORM targets
+
+## Socket vs Stdio Connections
+
+The LSP client supports both stdio (default) and socket-based connections:
+
+```typescript
+// Stdio connection (default)
+const client = new LSPClient({
+  serverCommand: 'clangd',
+  rootUri: `file://${workspaceDir}`,
+});
+
+// Socket connection
+const client = new LSPClient({
+  serverCommand: 'java',
+  serverArgs: ['-jar', 'server.jar'],
+  rootUri: `file://${workspaceDir}`,
+  socket: {
+    port: 1044,
+    host: 'localhost',  // optional, defaults to localhost
+  },
+});
+```
+
 ## Development
 
 ```bash
