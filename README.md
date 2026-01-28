@@ -213,6 +213,26 @@ The SQL example demonstrates:
 - Opening a virtual SQL document with CREATE TABLE and SELECT statements
 - Receiving diagnostics for SQL syntax errors
 
+### Rust Example
+
+```bash
+# Install rust-analyzer
+# macOS:
+brew install rust-analyzer
+
+# Or via rustup:
+rustup component add rust-analyzer
+
+# Run the Rust example
+npx tsx src/rust-example.ts
+```
+
+The Rust example demonstrates:
+- Connecting to rust-analyzer via stdio
+- Opening Rust source files from a Cargo project
+- Getting document symbols (structs, enums, impl blocks, functions, traits)
+- Getting hover info, completions, definitions, and references
+
 ## Development
 
 ```bash
