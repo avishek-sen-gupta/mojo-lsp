@@ -197,6 +197,22 @@ The Python example demonstrates:
 - Using the `cwd` option to run the server from a different directory
 - Opening Python files and querying document symbols
 
+### SQL Example
+
+```bash
+# Set up sql-language-server in a separate directory
+mkdir -p ../sql-lsp && cd ../sql-lsp
+npm init -y && npm install sql-language-server
+
+# Run the SQL example
+npx tsx src/sql-example.ts
+```
+
+The SQL example demonstrates:
+- Connecting to sql-language-server via stdio
+- Opening a virtual SQL document with CREATE TABLE and SELECT statements
+- Receiving diagnostics for SQL syntax errors
+
 ## Development
 
 ```bash

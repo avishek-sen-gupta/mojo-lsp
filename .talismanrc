@@ -1,3 +1,5 @@
 fileignoreconfig:
 - filename: package-lock.json
   checksum: 7dc39d099fe546c466c5889e0e02c25ecdcaa1b5515ee5e4de660cebc55df243
+- filename: src/sql-example.ts
+  checksum: 5e2888208163587b67e81d8495274f66595a222f5c5e721d3ea04e664cf17d32
