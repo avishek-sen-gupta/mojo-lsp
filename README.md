@@ -181,6 +181,24 @@ const client = new LSPClient({
 });
 ```
 
+### Python Example
+
+```bash
+# Set up basedpyright in a separate directory
+mkdir -p ../basedpyright-lsp-server && cd ../basedpyright-lsp-server
+poetry init -n && poetry add basedpyright
+
+# Run the Python example
+npx tsx src/python-example.ts
+```
+
+The Python example demonstrates:
+- Connecting to basedpyright language server via stdio
+- Using the `cwd` option to run the server from a different directory
+- Opening Python files and querying document symbols
+
+**Note:** basedpyright may have slower response times for document requests. If you experience timeouts, consider using `pylsp` or `pyright` directly.
+
 ## Development
 
 ```bash

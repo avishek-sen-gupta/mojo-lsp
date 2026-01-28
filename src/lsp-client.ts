@@ -53,6 +53,8 @@ export interface LSPClientOptions {
   rootUri: string;
   workspaceFolders?: { uri: string; name: string }[];
   logger?: Logger;
+  // Working directory for the server process
+  cwd?: string;
   // Socket connection options (alternative to stdio)
   socket?: {
     port: number;
@@ -88,6 +90,7 @@ export class LSPClient {
       // Spawn the server process first (it will listen on the socket)
       this.process = spawn(this.options.serverCommand, this.options.serverArgs || [], {
         stdio: ['pipe', 'pipe', 'pipe'],
+        cwd: this.options.cwd,
       });
 
       // Log stderr for debugging
@@ -125,6 +128,7 @@ export class LSPClient {
       // Stdio-based connection (default)
       this.process = spawn(this.options.serverCommand, this.options.serverArgs || [], {
         stdio: ['pipe', 'pipe', 'pipe'],
+        cwd: this.options.cwd,
       });
 
       if (!this.process.stdin || !this.process.stdout) {
@@ -150,6 +154,19 @@ export class LSPClient {
 
     // Create the protocol connection
     this.connection = createProtocolConnection(reader, writer, this.options.logger);
+
+    // Add error handlers
+    this.connection.onError((error) => {
+      if (this.options.logger) {
+        this.options.logger.error(`Connection error: ${JSON.stringify(error)}`);
+      }
+    });
+
+    this.connection.onClose(() => {
+      if (this.options.logger) {
+        this.options.logger.info('Connection closed');
+      }
+    });
 
     // Set up notification handlers
     this.setupNotificationHandlers();
