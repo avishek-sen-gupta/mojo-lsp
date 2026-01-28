@@ -88,6 +88,7 @@ The following LSP servers have been tested with this client:
 | COBOL | Che4z COBOL Language Server | https://github.com/eclipse-che4z/che-che4z-lsp-for-cobol |
 | Java | Eclipse JDT Language Server | https://github.com/eclipse-jdtls/eclipse.jdt.ls |
 | Python | pylsp | https://github.com/python-lsp/python-lsp-server |
+| Ruby | Solargraph | https://solargraph.org/ |
 | Rust | rust-analyzer | https://rust-analyzer.github.io/ |
 | SQL | sql-language-server | https://github.com/joe-re/sql-language-server |
 | TypeScript | typescript-language-server | https://github.com/typescript-language-server/typescript-language-server |
@@ -247,6 +248,22 @@ The Rust example demonstrates:
 - Opening Rust source files from a Cargo project
 - Getting document symbols (structs, enums, impl blocks, functions, traits)
 - Getting hover info, completions, definitions, and references
+
+### Ruby Example
+
+```bash
+# Install solargraph
+gem install solargraph
+
+# Run the Ruby example
+npx tsx src/ruby-example.ts
+```
+
+The Ruby example demonstrates:
+- Connecting to Solargraph via stdio
+- Opening Ruby source files from a project with a Gemfile
+- Getting document symbols (classes, modules, methods)
+- Getting hover info with documentation, definitions, and references
 
 ## Development
 
