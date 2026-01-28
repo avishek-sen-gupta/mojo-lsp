@@ -87,6 +87,7 @@ The following LSP servers have been tested with this client:
 | C# | csharp-ls | https://github.com/razzmatazz/csharp-language-server |
 | COBOL | Che4z COBOL Language Server | https://github.com/eclipse-che4z/che-che4z-lsp-for-cobol |
 | Java | Eclipse JDT Language Server | https://github.com/eclipse-jdtls/eclipse.jdt.ls |
+| Perl | PerlNavigator | https://github.com/bscan/PerlNavigator |
 | Python | pylsp | https://github.com/python-lsp/python-lsp-server |
 | Ruby | Solargraph | https://solargraph.org/ |
 | Rust | rust-analyzer | https://rust-analyzer.github.io/ |
@@ -264,6 +265,23 @@ The Ruby example demonstrates:
 - Opening Ruby source files from a project with a Gemfile
 - Getting document symbols (classes, modules, methods)
 - Getting hover info with documentation, definitions, and references
+
+### Perl Example
+
+```bash
+# Download PerlNavigator from GitHub releases
+# https://github.com/bscan/PerlNavigator/releases
+# Place the binary in ~/code/perlnavigator/
+
+# Run the Perl example
+npx tsx src/perl-example.ts
+```
+
+The Perl example demonstrates:
+- Connecting to PerlNavigator via stdio
+- Opening a virtual Perl document with package, subroutines, and variables
+- Getting document symbols (packages, subroutines, variables)
+- Getting hover info, completions, definitions, and references
 
 ## Development
 
