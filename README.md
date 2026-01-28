@@ -77,18 +77,45 @@ await client.stop();
 | `getServerCapabilities()` | Get server capabilities after init |
 | `getConnection()` | Get the underlying protocol connection |
 
-## Running the Example
+## Running the Examples
+
+### TypeScript Example
 
 ```bash
 # Install dependencies
 npm install
 
-# Install a language server (e.g., TypeScript)
+# Install TypeScript language server
 npm install -g typescript-language-server typescript
 
-# Run the example
+# Run the TypeScript example
 npm run example
 ```
+
+### Java Example
+
+```bash
+# Install Eclipse JDT Language Server
+# See: https://github.com/eclipse/eclipse.jdt.ls
+
+# Run the Java example
+npx tsx src/java-example.ts
+```
+
+### C# Example
+
+```bash
+# Install csharp-ls (Roslyn-based C# language server)
+dotnet tool install --global csharp-ls
+
+# Run the C# example (opens a random .cs file from ../CleanArchitecture)
+npx tsx src/csharp-example.ts
+```
+
+The C# example demonstrates:
+- Connecting to csharp-ls with a .NET solution
+- Opening an existing C# file from the codebase
+- Getting document symbols, hover info, completions, definitions, and references
 
 ## Development
 
