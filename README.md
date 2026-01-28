@@ -117,6 +117,31 @@ The C# example demonstrates:
 - Opening an existing C# file from the codebase
 - Getting document symbols, hover info, completions, definitions, and references
 
+### C++ Example
+
+```bash
+# Install clangd (C/C++ language server)
+# macOS:
+brew install llvm
+
+# Ubuntu/Debian:
+apt install clangd
+
+# Run the C++ example (opens a random .cpp/.h file from ../spdlog)
+npx tsx src/cpp-example.ts
+```
+
+The C++ example demonstrates:
+- Connecting to clangd for C/C++ code intelligence
+- Opening an existing C++ file from the spdlog library
+- Getting document symbols (namespaces, classes, methods, fields)
+- Getting hover info, completions, definitions, and references
+
+For best results with clangd, generate `compile_commands.json` in your project:
+```bash
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
+```
+
 ## Development
 
 ```bash
