@@ -77,6 +77,21 @@ await client.stop();
 | `getServerCapabilities()` | Get server capabilities after init |
 | `getConnection()` | Get the underlying protocol connection |
 
+## Supported Languages
+
+The following LSP servers have been tested with this client:
+
+| Language | LSP Server | Project |
+|----------|------------|---------|
+| C/C++ | clangd | https://clangd.llvm.org/ |
+| C# | csharp-ls | https://github.com/razzmatazz/csharp-language-server |
+| COBOL | Che4z COBOL Language Server | https://github.com/eclipse-che4z/che-che4z-lsp-for-cobol |
+| Java | Eclipse JDT Language Server | https://github.com/eclipse-jdtls/eclipse.jdt.ls |
+| Python | pylsp | https://github.com/python-lsp/python-lsp-server |
+| Rust | rust-analyzer | https://rust-analyzer.github.io/ |
+| SQL | sql-language-server | https://github.com/joe-re/sql-language-server |
+| TypeScript | typescript-language-server | https://github.com/typescript-language-server/typescript-language-server |
+
 ## Running the Examples
 
 ### TypeScript Example
