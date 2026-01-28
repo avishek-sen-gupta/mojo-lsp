@@ -36,6 +36,8 @@ import {
   PublishDiagnosticsParams,
   ConfigurationRequest,
   ConfigurationParams,
+  RegistrationRequest,
+  WorkDoneProgressCreateRequest,
   Logger,
   Diagnostic,
 } from 'vscode-languageserver-protocol';
@@ -187,6 +189,24 @@ export class LSPClient {
       (params: ConfigurationParams) => {
         // Return empty config for each requested item
         return params.items.map(() => ({}));
+      }
+    );
+
+    // Handle client/registerCapability requests from server (dynamic registration)
+    this.connection.onRequest(
+      RegistrationRequest.type,
+      (_params) => {
+        // Accept all dynamic registrations
+        return;
+      }
+    );
+
+    // Handle window/workDoneProgress/create requests from server
+    this.connection.onRequest(
+      WorkDoneProgressCreateRequest.type,
+      (_params) => {
+        // Accept progress token creation
+        return;
       }
     );
   }
