@@ -39,18 +39,14 @@ function findPythonFiles(dir: string): string[] {
 }
 
 async function main() {
-  // Example: Connect to basedpyright Language Server
-  // basedpyright is a fork of pyright with additional features
+  // Example: Connect to pylsp (Python Language Server)
   //
   // Setup:
-  //   cd ../basedpyright-lsp-server
-  //   poetry add basedpyright
-  //
-  // NOTE: basedpyright may have slower response times for document requests.
-  // Consider using pylsp or pyright directly if you experience issues.
+  //   cd ../pylsp
+  //   poetry add python-lsp-server
 
   const workspaceRoot = process.cwd();
-  const serverDir = path.resolve(workspaceRoot, '../basedpyright-lsp-server');
+  const serverDir = path.resolve(workspaceRoot, '../pylsp');
   const pythonProjectDir = '/Users/asgupta/code/smol-python-project';
 
   if (!fs.existsSync(serverDir)) {
@@ -70,14 +66,14 @@ async function main() {
 
   const client = new LSPClient({
     serverCommand: 'poetry',
-    serverArgs: ['run', 'basedpyright-langserver', '--stdio'],
+    serverArgs: ['run', 'pylsp', '-v'],
     rootUri: `file://${pythonProjectDir}`,
     logger,
     cwd: serverDir,
   });
 
   try {
-    console.log('Starting Python language server (basedpyright)...');
+    console.log('Starting Python language server (pylsp)...');
     const initResult = await client.start();
     console.log('Server initialized!');
     console.log('Hover support:', initResult.capabilities.hoverProvider);
@@ -104,7 +100,7 @@ async function main() {
 
     // Wait for analysis
     console.log('Waiting for server to analyze...');
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // Get document symbols
     console.log('\n=== Document Symbols ===\n');
