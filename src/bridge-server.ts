@@ -1,50 +1,14 @@
 import express, { Request, Response, NextFunction, Router } from 'express';
 import { Server } from 'http';
 import { LSPClient, LSPClientOptions } from './lsp-client';
-import { Diagnostic } from 'vscode-languageserver-protocol';
-
-// Types
-
-interface DiagnosticsBuffer {
-  [uri: string]: Diagnostic[];
-}
-
-interface StartBody {
-  serverCommand: string;
-  serverArgs?: string[];
-  rootUri: string;
-  cwd?: string;
-  socket?: { port: number; host?: string };
-}
-
-interface DocumentBody {
-  uri: string;
-  languageId?: string;
-  text?: string;
-}
-
-interface PositionBody {
-  uri: string;
-  line: number;
-  character: number;
-  includeDeclaration?: boolean;
-}
-
-// Custom error class
-
-class BadRequestError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'BadRequestError';
-  }
-}
-
-// Bridge server state (shared across routes)
-
-interface BridgeState {
-  client: LSPClient | null;
-  diagnosticsBuffer: Map<string, Diagnostic[]>;
-}
+import {
+  DiagnosticsBuffer,
+  StartBody,
+  DocumentBody,
+  PositionBody,
+  BridgeState,
+  BadRequestError,
+} from './bridge-types';
 
 // Route factories
 
