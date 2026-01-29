@@ -1,4 +1,4 @@
-import { LSPClient } from './lsp-client';
+import { createPerlLspClient } from './lsp-server/perl-lsp-server';
 import { Logger, SymbolKind } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as os from 'os';
@@ -121,9 +121,8 @@ async function main() {
   const perlNavigatorPath = path.join(os.homedir(), 'code', 'perlnavigator', 'perlnavigator');
   const workspaceDir = process.cwd();
 
-  const client = new LSPClient({
-    serverCommand: perlNavigatorPath,
-    serverArgs: ['--stdio'],
+  const client = createPerlLspClient({
+    serverPath: perlNavigatorPath,
     rootUri: `file://${workspaceDir}`,
     logger,
   });

@@ -1,4 +1,4 @@
-import { LSPClient } from './lsp-client';
+import { createCsharpLspClient, findCsharpFiles } from './lsp-server/csharp-lsp-server';
 import { Logger, SymbolKind } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -44,23 +44,6 @@ function symbolKindName(kind: SymbolKind): string {
   return names[kind] || `Unknown(${kind})`;
 }
 
-// Recursively find all .cs files in a directory
-function findCSharpFiles(dir: string): string[] {
-  const files: string[] = [];
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'bin' && entry.name !== 'obj') {
-      files.push(...findCSharpFiles(fullPath));
-    } else if (entry.isFile() && entry.name.endsWith('.cs')) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
-}
-
 async function main() {
   // Example: Connect to csharp-ls (C# Language Server)
   // You need to have csharp-ls installed:
@@ -73,7 +56,7 @@ async function main() {
   const cleanArchitectureDir = path.resolve(workspaceRoot, '../CleanArchitecture');
 
   // Find all C# files in the CleanArchitecture directory
-  const csFiles = findCSharpFiles(cleanArchitectureDir);
+  const csFiles = findCsharpFiles(cleanArchitectureDir);
   if (csFiles.length === 0) {
     console.error('No C# files found in', cleanArchitectureDir);
     return;
@@ -84,10 +67,9 @@ async function main() {
   console.log(`Found ${csFiles.length} C# files. Selected: ${randomFile}`);
 
   const solutionPath = path.join(cleanArchitectureDir, 'CleanArchitecture.sln');
-  const client = new LSPClient({
-    serverCommand: 'csharp-ls',
-    serverArgs: ['--loglevel', 'INFO', '--solution', solutionPath],
+  const client = createCsharpLspClient({
     rootUri: `file://${cleanArchitectureDir}`,
+    solutionPath,
     logger,
   });
 

@@ -1,4 +1,4 @@
-import { LSPClient } from './lsp-client';
+import { createCobolLspClient, findCobolFiles } from './lsp-server/cobol-lsp-server';
 import { Logger, SymbolKind } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -44,27 +44,6 @@ function symbolKindName(kind: SymbolKind): string {
   return names[kind] || `Unknown(${kind})`;
 }
 
-// Recursively find all COBOL files in a directory
-function findCobolFiles(dir: string): string[] {
-  const files: string[] = [];
-  const cobolExtensions = ['.cob', '.cbl', '.cobol', '.CBL', '.COB', '.COBOL'];
-
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    // Skip hidden directories and common non-source directories
-    if (entry.isDirectory() && !entry.name.startsWith('.') &&
-        !['node_modules', 'target', 'build', 'dist'].includes(entry.name)) {
-      files.push(...findCobolFiles(fullPath));
-    } else if (entry.isFile() && cobolExtensions.some(ext => entry.name.endsWith(ext))) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
-}
-
 async function main() {
   // Example: Connect to Che4z COBOL Language Server
   // The server is a Java JAR file that communicates over stdio
@@ -75,13 +54,6 @@ async function main() {
   const workspaceRoot = process.cwd();
   const che4zDir = path.resolve(workspaceRoot, '../che-che4z-lsp-for-cobol-2.4.3');
   const serverJar = path.join(che4zDir, 'server/engine/target/server.jar');
-
-  // Verify the server JAR exists
-  if (!fs.existsSync(serverJar)) {
-    console.error('Server JAR not found:', serverJar);
-    console.error('Please build the Che4z COBOL Language Server first.');
-    return;
-  }
 
   // Find all COBOL files in the Che4z directory (uses test files)
   const cobolFiles = findCobolFiles(che4zDir);
@@ -100,16 +72,10 @@ async function main() {
   const randomFile = filesToChooseFrom[Math.floor(Math.random() * filesToChooseFrom.length)];
   console.log(`Found ${cobolFiles.length} COBOL files (${preferredFiles.length} preferred). Selected: ${randomFile}`);
 
-  const client = new LSPClient({
-    serverCommand: 'java',
-    serverArgs: ['-jar', serverJar],
+  const client = createCobolLspClient({
+    serverJar,
     rootUri: `file://${che4zDir}`,
     logger,
-    // Che4z COBOL server uses socket communication
-    socket: {
-      port: 1044,
-      host: 'localhost',
-    },
   });
 
   try {

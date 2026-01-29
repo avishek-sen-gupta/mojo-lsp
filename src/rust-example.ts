@@ -1,4 +1,4 @@
-import { LSPClient } from './lsp-client';
+import { createRustLspClient } from './lsp-server/rust-lsp-server';
 import { Logger, SymbolKind } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -44,26 +44,6 @@ function symbolKindName(kind: SymbolKind): string {
   return names[kind] || `Unknown(${kind})`;
 }
 
-// Recursively find all Rust files in a directory
-function findRustFiles(dir: string): string[] {
-  const files: string[] = [];
-
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    // Skip hidden directories, target directory, and common non-source directories
-    if (entry.isDirectory() && !entry.name.startsWith('.') &&
-        !['target', 'node_modules', 'vendor'].includes(entry.name)) {
-      files.push(...findRustFiles(fullPath));
-    } else if (entry.isFile() && entry.name.endsWith('.rs')) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
-}
-
 async function main() {
   // Example: Connect to rust-analyzer (Rust Language Server)
   // You need to have rust-analyzer installed:
@@ -87,8 +67,7 @@ async function main() {
   }
   console.log(`Selected: ${targetFile}`);
 
-  const client = new LSPClient({
-    serverCommand: 'rust-analyzer',
+  const client = createRustLspClient({
     rootUri: `file://${rustProjectDir}`,
     logger,
   });

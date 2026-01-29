@@ -1,4 +1,4 @@
-import { LSPClient } from './lsp-client';
+import { createRubyLspClient } from './lsp-server/ruby-lsp-server';
 import { Logger, SymbolKind } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -65,11 +65,8 @@ async function main() {
   }
   console.log(`Selected: ${targetFile}`);
 
-  const client = new LSPClient({
-    serverCommand: 'solargraph',
-    serverArgs: ['stdio'],
+  const client = createRubyLspClient({
     rootUri: `file://${rubyProjectDir}`,
-    cwd: rubyProjectDir,
     logger,
   });
 

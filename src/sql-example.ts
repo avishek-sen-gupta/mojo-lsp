@@ -1,4 +1,4 @@
-import { LSPClient } from './lsp-client';
+import { createSqlLspClient } from './lsp-server/sql-lsp-server';
 import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -21,12 +21,6 @@ async function main() {
   const workspaceRoot = process.cwd();
   const serverPath = path.resolve(workspaceRoot, '../sql-lsp/node_modules/.bin/sql-language-server');
 
-  if (!fs.existsSync(serverPath)) {
-    console.error('SQL language server not found:', serverPath);
-    console.error('Please run: cd ../sql-lsp && npm install sql-language-server');
-    return;
-  }
-
   // Use a sample SQL content for demonstration
   // Includes intentional syntax errors to demonstrate diagnostics
   const sampleSql = `
@@ -48,9 +42,8 @@ CREATE TABLE orders (
 SELECT * FROM users;
 `.trim();
 
-  const client = new LSPClient({
-    serverCommand: serverPath,
-    serverArgs: ['up', '--method', 'stdio'],
+  const client = createSqlLspClient({
+    serverPath,
     rootUri: `file://${workspaceRoot}`,
     logger,
   });

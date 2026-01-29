@@ -1,4 +1,4 @@
-import { LSPClient } from './lsp-client';
+import { createPythonLspClient, findPythonFiles } from './lsp-server/python-lsp-server';
 import { Logger, SymbolKind } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -21,23 +21,6 @@ function symbolKindName(kind: SymbolKind): string {
   return names[kind] || `Unknown(${kind})`;
 }
 
-// Recursively find all Python files in a directory
-function findPythonFiles(dir: string): string[] {
-  const files: string[] = [];
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory() && !entry.name.startsWith('.') &&
-        !['node_modules', 'venv', '.venv', '__pycache__', 'build', 'dist'].includes(entry.name)) {
-      files.push(...findPythonFiles(fullPath));
-    } else if (entry.isFile() && entry.name.endsWith('.py')) {
-      files.push(fullPath);
-    }
-  }
-  return files;
-}
-
 async function main() {
   // Example: Connect to pylsp (Python Language Server)
   //
@@ -49,11 +32,6 @@ async function main() {
   const serverDir = path.resolve(workspaceRoot, '../pylsp');
   const pythonProjectDir = '/Users/asgupta/code/smol-python-project';
 
-  if (!fs.existsSync(serverDir)) {
-    console.error('Server directory not found:', serverDir);
-    return;
-  }
-
   // Find Python files
   const pythonFiles = findPythonFiles(pythonProjectDir);
   if (pythonFiles.length === 0) {
@@ -64,12 +42,10 @@ async function main() {
   const selectedFile = pythonFiles[0];
   console.log(`Found ${pythonFiles.length} Python files. Using: ${selectedFile}`);
 
-  const client = new LSPClient({
-    serverCommand: 'poetry',
-    serverArgs: ['run', 'pylsp', '-v'],
+  const client = createPythonLspClient({
     rootUri: `file://${pythonProjectDir}`,
+    serverDir,
     logger,
-    cwd: serverDir,
   });
 
   try {

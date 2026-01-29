@@ -1,4 +1,4 @@
-import { LSPClient } from './lsp-client';
+import { createJavaLspClient } from './lsp-server/java-lsp-server';
 import { Logger, SymbolKind } from 'vscode-languageserver-protocol';
 import * as fs from 'fs';
 
@@ -52,9 +52,7 @@ async function main() {
 
   const workspaceRoot = '/Users/asgupta/code/smojol';
 
-  const client = new LSPClient({
-    serverCommand: 'jdtls',
-    serverArgs: [],
+  const client = createJavaLspClient({
     rootUri: `file://${workspaceRoot}`,
     logger,
   });

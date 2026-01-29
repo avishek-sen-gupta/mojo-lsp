@@ -1,4 +1,4 @@
-import { LSPClient } from './lsp-client';
+import { createTypescriptLspClient } from './lsp-server/typescript-lsp-server';
 import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -18,10 +18,7 @@ async function main() {
 
   const workspaceRoot = process.cwd();
 
-  const client = new LSPClient({
-    // Replace with your language server command
-    serverCommand: 'typescript-language-server',
-    serverArgs: ['--stdio'],
+  const client = createTypescriptLspClient({
     rootUri: `file://${workspaceRoot}`,
     logger,
   });

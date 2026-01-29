@@ -1,4 +1,4 @@
-import { LSPClient } from './lsp-client';
+import { createCppLspClient, findCppFiles } from './lsp-server/cpp-lsp-server';
 import { Logger, SymbolKind } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -44,27 +44,6 @@ function symbolKindName(kind: SymbolKind): string {
   return names[kind] || `Unknown(${kind})`;
 }
 
-// Recursively find all C++ files in a directory
-function findCppFiles(dir: string): string[] {
-  const files: string[] = [];
-  const cppExtensions = ['.cpp', '.cc', '.cxx', '.c', '.hpp', '.h', '.hxx'];
-
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    // Skip hidden directories, build directories, and common non-source directories
-    if (entry.isDirectory() && !entry.name.startsWith('.') &&
-        !['build', 'cmake-build-debug', 'cmake-build-release', 'node_modules', 'third_party'].includes(entry.name)) {
-      files.push(...findCppFiles(fullPath));
-    } else if (entry.isFile() && cppExtensions.some(ext => entry.name.endsWith(ext))) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
-}
-
 async function main() {
   // Example: Connect to clangd (C/C++ Language Server)
   // You need to have clangd installed:
@@ -91,9 +70,7 @@ async function main() {
   const randomFile = filesToChooseFrom[Math.floor(Math.random() * filesToChooseFrom.length)];
   console.log(`Found ${cppFiles.length} C++ files. Selected: ${randomFile}`);
 
-  const client = new LSPClient({
-    serverCommand: 'clangd',
-    serverArgs: ['--log=error'],
+  const client = createCppLspClient({
     rootUri: `file://${spdlogDir}`,
     logger,
   });
