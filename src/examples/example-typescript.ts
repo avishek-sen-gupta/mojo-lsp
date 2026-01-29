@@ -1,4 +1,4 @@
-import { createTypescriptLspClient } from './lsp-server/typescript-lsp-server';
+import { createTypescriptLspClient } from '../lsp-server/typescript-lsp-server';
 import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';

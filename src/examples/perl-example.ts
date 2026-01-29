@@ -1,4 +1,4 @@
-import { createPerlLspClient } from './lsp-server/perl-lsp-server';
+import { createPerlLspClient } from '../lsp-server/perl-lsp-server';
 import { Logger, SymbolKind } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as os from 'os';

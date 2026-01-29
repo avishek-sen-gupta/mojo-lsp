@@ -1,4 +1,4 @@
-import { createJavaLspClient } from './lsp-server/java-lsp-server';
+import { createJavaLspClient } from '../lsp-server/java-lsp-server';
 import { Logger, SymbolKind } from 'vscode-languageserver-protocol';
 import * as fs from 'fs';
 

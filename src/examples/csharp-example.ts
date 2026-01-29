@@ -1,4 +1,4 @@
-import { createRustLspClient } from './lsp-server/rust-lsp-server';
+import { createCsharpLspClient, findCsharpFiles } from '../lsp-server/csharp-lsp-server';
 import { Logger, SymbolKind } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -45,36 +45,37 @@ function symbolKindName(kind: SymbolKind): string {
 }
 
 async function main() {
-  // Example: Connect to rust-analyzer (Rust Language Server)
-  // You need to have rust-analyzer installed:
-  //   - macOS: brew install rust-analyzer
-  //   - Or via rustup: rustup component add rust-analyzer
-  //   - Or download from https://rust-analyzer.github.io/
+  // Example: Connect to csharp-ls (C# Language Server)
+  // You need to have csharp-ls installed:
+  //   dotnet tool install --global csharp-ls
+  //
+  // csharp-ls is a Roslyn-based language server for C#
+  // https://github.com/razzmatazz/csharp-language-server
 
-  const rustProjectDir = '/Users/asgupta/code/rust-web-app';
+  const workspaceRoot = process.cwd();
+  const cleanArchitectureDir = path.resolve(workspaceRoot, '../CleanArchitecture');
 
-  // Verify the directory exists
-  if (!fs.existsSync(rustProjectDir)) {
-    console.error('Rust project directory not found:', rustProjectDir);
+  // Find all C# files in the CleanArchitecture directory
+  const csFiles = findCsharpFiles(cleanArchitectureDir);
+  if (csFiles.length === 0) {
+    console.error('No C# files found in', cleanArchitectureDir);
     return;
   }
 
-  // Use a specific file: error.rs
-  const targetFile = path.join(rustProjectDir, 'src/domain/error.rs');
-  if (!fs.existsSync(targetFile)) {
-    console.error('Target file not found:', targetFile);
-    return;
-  }
-  console.log(`Selected: ${targetFile}`);
+  // Pick a random C# file
+  const randomFile = csFiles[Math.floor(Math.random() * csFiles.length)];
+  console.log(`Found ${csFiles.length} C# files. Selected: ${randomFile}`);
 
-  const client = createRustLspClient({
-    rootUri: `file://${rustProjectDir}`,
+  const solutionPath = path.join(cleanArchitectureDir, 'CleanArchitecture.sln');
+  const client = createCsharpLspClient({
+    rootUri: `file://${cleanArchitectureDir}`,
+    solutionPath,
     logger,
   });
 
   try {
     // Start the client and initialize the server
-    console.log('Starting Rust language server (rust-analyzer)...');
+    console.log('Starting C# language server (csharp-ls)...');
     const initResult = await client.start();
     console.log('Server initialized!');
     console.log('Hover support:', initResult.capabilities.hoverProvider);
@@ -85,27 +86,24 @@ async function main() {
     client.onDiagnostics((params) => {
       if (params.diagnostics.length > 0) {
         console.log(`\nDiagnostics for ${path.basename(params.uri)}:`);
-        for (const diag of params.diagnostics.slice(0, 5)) {
+        for (const diag of params.diagnostics) {
           const severity = ['', 'Error', 'Warning', 'Info', 'Hint'][diag.severity || 1];
           console.log(`  [${severity}] Line ${diag.range.start.line + 1}: ${diag.message}`);
-        }
-        if (params.diagnostics.length > 5) {
-          console.log(`  ... and ${params.diagnostics.length - 5} more`);
         }
       }
     });
 
-    // Read the content of the target Rust file
-    const fileContent = fs.readFileSync(targetFile, 'utf-8');
-    const fileUri = `file://${targetFile}`;
+    // Read the content of the random C# file
+    const fileContent = fs.readFileSync(randomFile, 'utf-8');
+    const fileUri = `file://${randomFile}`;
 
     // Open the document
-    await client.openDocument(fileUri, 'rust', fileContent);
-    console.log('\nOpened document:', targetFile);
+    await client.openDocument(fileUri, 'csharp', fileContent);
+    console.log('\nOpened document:', randomFile);
 
-    // Wait for rust-analyzer to analyze the file
-    console.log('Waiting for rust-analyzer to analyze the file...');
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    // Wait for the server to analyze the file (C# solution loading can take a while)
+    console.log('Waiting for server to analyze the solution (this may take a moment)...');
+    await new Promise((resolve) => setTimeout(resolve, 10000));
 
     // Get document symbols
     console.log('\n=== Document Symbols ===\n');
@@ -131,33 +129,32 @@ async function main() {
         printSymbol(sym);
       }
     } else {
-      console.log('No symbols found');
+      console.log('No symbols found (server may need more time to index)');
     }
 
     // Find interesting locations in the file for hover/completion/definition
     const lines = fileContent.split('\n');
 
-    // Find a line with a struct or enum declaration
-    let structLine = -1;
-    let structCol = 0;
+    // Find a line with a class declaration
+    let classLine = -1;
+    let classCol = 0;
     for (let i = 0; i < lines.length; i++) {
-      const match = lines[i].match(/\b(struct|enum)\s+(\w+)/);
-      if (match && !lines[i].trim().startsWith('//')) {
-        structLine = i;
-        structCol = lines[i].indexOf(match[2]);
+      const match = lines[i].match(/\bclass\s+(\w+)/);
+      if (match) {
+        classLine = i;
+        classCol = lines[i].indexOf(match[1]);
         break;
       }
     }
 
-    // Find a line with a function declaration
-    let funcLine = -1;
-    let funcCol = 0;
+    // Find a line with a method declaration
+    let methodLine = -1;
+    let methodCol = 0;
     for (let i = 0; i < lines.length; i++) {
-      // Match function declarations (fn function_name or pub fn function_name)
-      const match = lines[i].match(/\b(?:pub\s+)?(?:async\s+)?fn\s+(\w+)/);
-      if (match && !lines[i].trim().startsWith('//')) {
-        funcLine = i;
-        funcCol = lines[i].indexOf(match[1]);
+      const match = lines[i].match(/\b(public|private|protected|internal)\s+\w+\s+(\w+)\s*\(/);
+      if (match && !lines[i].includes('class ')) {
+        methodLine = i;
+        methodCol = lines[i].indexOf(match[2]);
         break;
       }
     }
@@ -165,45 +162,36 @@ async function main() {
     // Get hover info
     console.log('\n=== Hover Information ===\n');
 
-    if (structLine >= 0) {
-      console.log(`Hover over struct/enum (line ${structLine + 1}, col ${structCol}):`);
-      const hoverStruct = await client.getHover(fileUri, structLine, structCol);
-      if (hoverStruct?.contents) {
-        console.log('  ', JSON.stringify(hoverStruct.contents, null, 2));
+    if (classLine >= 0) {
+      console.log(`Hover over class (line ${classLine + 1}, col ${classCol}):`);
+      const hoverClass = await client.getHover(fileUri, classLine, classCol);
+      if (hoverClass?.contents) {
+        console.log('  ', JSON.stringify(hoverClass.contents, null, 2));
       } else {
         console.log('  No hover info available');
       }
     }
 
-    if (funcLine >= 0) {
-      console.log(`\nHover over function (line ${funcLine + 1}, col ${funcCol}):`);
-      const hoverFunc = await client.getHover(fileUri, funcLine, funcCol);
-      if (hoverFunc?.contents) {
-        console.log('  ', JSON.stringify(hoverFunc.contents, null, 2));
+    if (methodLine >= 0) {
+      console.log(`\nHover over method (line ${methodLine + 1}, col ${methodCol}):`);
+      const hoverMethod = await client.getHover(fileUri, methodLine, methodCol);
+      if (hoverMethod?.contents) {
+        console.log('  ', JSON.stringify(hoverMethod.contents, null, 2));
       } else {
         console.log('  No hover info available');
       }
     }
 
-    // Get completions after :: or .
+    // Get completions at the end of a line with a dot
     console.log('\n=== Completions ===\n');
     let completionLine = -1;
     let completionCol = 0;
     for (let i = 0; i < lines.length; i++) {
-      // Look for :: (path separator) or . (method call)
-      const scopeIndex = lines[i].lastIndexOf('::');
       const dotIndex = lines[i].lastIndexOf('.');
-
-      if (!lines[i].trim().startsWith('//')) {
-        if (scopeIndex > 0) {
-          completionLine = i;
-          completionCol = scopeIndex + 2;
-          break;
-        } else if (dotIndex > 0) {
-          completionLine = i;
-          completionCol = dotIndex + 1;
-          break;
-        }
+      if (dotIndex > 0 && !lines[i].trim().startsWith('//') && !lines[i].trim().startsWith('using')) {
+        completionLine = i;
+        completionCol = dotIndex + 1;
+        break;
       }
     }
 
@@ -228,18 +216,16 @@ async function main() {
 
     // Get definition
     console.log('\n=== Definition ===\n');
-    if (funcLine >= 0) {
-      console.log(`Definition lookup at line ${funcLine + 1}, col ${funcCol}:`);
-      const definition = await client.getDefinition(fileUri, funcLine, funcCol);
+    if (methodLine >= 0) {
+      console.log(`Definition lookup at line ${methodLine + 1}, col ${methodCol}:`);
+      const definition = await client.getDefinition(fileUri, methodLine, methodCol);
       if (definition) {
         const defs = Array.isArray(definition) ? definition : [definition];
         for (const def of defs) {
-          if ('uri' in def && 'range' in def) {
-            const defFile = def.uri.replace('file://', '');
-            console.log(`  Defined in ${path.basename(defFile)} at line ${def.range.start.line + 1}, col ${def.range.start.character}`);
-          } else if ('targetUri' in def) {
-            const defFile = def.targetUri.replace('file://', '');
-            console.log(`  Defined in ${path.basename(defFile)} at line ${def.targetRange.start.line + 1}, col ${def.targetRange.start.character}`);
+          if ('range' in def) {
+            console.log(`  Defined at line ${def.range.start.line + 1}, col ${def.range.start.character}`);
+          } else if ('targetRange' in def) {
+            console.log(`  Defined at line ${def.targetRange.start.line + 1}, col ${def.targetRange.start.character}`);
           }
         }
       } else {
@@ -249,9 +235,9 @@ async function main() {
 
     // Get references
     console.log('\n=== References ===\n');
-    if (structLine >= 0) {
-      console.log(`References for struct/enum at line ${structLine + 1}:`);
-      const references = await client.getReferences(fileUri, structLine, structCol, true);
+    if (classLine >= 0) {
+      console.log(`References for class at line ${classLine + 1}:`);
+      const references = await client.getReferences(fileUri, classLine, classCol, true);
       if (references && references.length > 0) {
         for (const ref of references.slice(0, 10)) {
           const refFile = ref.uri.replace('file://', '');

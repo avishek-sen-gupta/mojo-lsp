@@ -1,4 +1,4 @@
-import { createCobolLspClient, findCobolFiles } from './lsp-server/cobol-lsp-server';
+import { createCobolLspClient, findCobolFiles } from '../lsp-server/cobol-lsp-server';
 import { Logger, SymbolKind } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';

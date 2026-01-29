@@ -1,4 +1,4 @@
-import { createSqlLspClient } from './lsp-server/sql-lsp-server';
+import { createSqlLspClient } from '../lsp-server/sql-lsp-server';
 import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';

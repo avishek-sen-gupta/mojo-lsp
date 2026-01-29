@@ -1,4 +1,4 @@
-import { createCppLspClient, findCppFiles } from './lsp-server/cpp-lsp-server';
+import { createCppLspClient, findCppFiles } from '../lsp-server/cpp-lsp-server';
 import { Logger, SymbolKind } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
