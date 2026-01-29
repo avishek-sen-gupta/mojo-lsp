@@ -10,7 +10,54 @@ A generic Language Server Protocol (LSP) client library for Node.js built on top
 npm install mojo-lsp
 ```
 
+## Project Structure
+
+```
+src/
+├── lsp-client.ts          # Core LSP client implementation
+├── index.ts               # Main exports
+├── lsp-server/            # Language-specific LSP server factory modules
+│   ├── typescript-lsp-server.ts
+│   ├── python-lsp-server.ts
+│   ├── java-lsp-server.ts
+│   ├── ruby-lsp-server.ts
+│   ├── perl-lsp-server.ts
+│   ├── rust-lsp-server.ts
+│   ├── cpp-lsp-server.ts
+│   ├── csharp-lsp-server.ts
+│   ├── cobol-lsp-server.ts
+│   └── sql-lsp-server.ts
+├── bridge/                # REST API bridge for LSP servers
+│   ├── bridge-server.ts
+│   ├── bridge-cli.ts
+│   └── bridge-types.ts
+└── examples/              # Example usage for each language
+    ├── example-typescript.ts
+    ├── python-example.ts
+    ├── java-example.ts
+    ├── ruby-example.ts
+    └── ...
+```
+
 ## Usage
+
+### Using LSP Server Factory Functions (Recommended)
+
+Each supported language has a dedicated factory module that simplifies client creation:
+
+```typescript
+import { createTypescriptLspClient } from 'mojo-lsp/lsp-server/typescript-lsp-server';
+
+const client = createTypescriptLspClient({
+  rootUri: `file://${process.cwd()}`,
+});
+
+await client.start();
+// Use the client...
+await client.stop();
+```
+
+### Using LSPClient Directly
 
 ```typescript
 import { LSPClient } from 'mojo-lsp';
@@ -45,6 +92,41 @@ const hover = await client.getHover('file:///path/to/file.ts', 0, 6);
 await client.stop();
 ```
 
+## LSP Server Factory Modules
+
+Factory modules provide pre-configured LSP clients for each language:
+
+| Language | Factory Function | Module |
+|----------|-----------------|--------|
+| TypeScript | `createTypescriptLspClient()` | `lsp-server/typescript-lsp-server` |
+| Python | `createPythonLspClient()` | `lsp-server/python-lsp-server` |
+| Java | `createJavaLspClient()` | `lsp-server/java-lsp-server` |
+| Ruby | `createRubyLspClient()` | `lsp-server/ruby-lsp-server` |
+| Perl | `createPerlLspClient()` | `lsp-server/perl-lsp-server` |
+| Rust | `createRustLspClient()` | `lsp-server/rust-lsp-server` |
+| C/C++ | `createCppLspClient()` | `lsp-server/cpp-lsp-server` |
+| C# | `createCsharpLspClient()` | `lsp-server/csharp-lsp-server` |
+| COBOL | `createCobolLspClient()` | `lsp-server/cobol-lsp-server` |
+| SQL | `createSqlLspClient()` | `lsp-server/sql-lsp-server` |
+
+Each module also exports a `find*Files()` helper function to discover source files.
+
+### Example: Python LSP Client
+
+```typescript
+import { createPythonLspClient, findPythonFiles } from 'mojo-lsp/lsp-server/python-lsp-server';
+
+const client = createPythonLspClient({
+  rootUri: 'file:///path/to/python/project',
+  serverDir: '/path/to/pylsp/installation',  // Directory with poetry/pylsp
+});
+
+await client.start();
+
+// Find Python files in the project
+const pythonFiles = findPythonFiles('/path/to/python/project');
+```
+
 ## API
 
 ### `LSPClient`
@@ -58,6 +140,8 @@ await client.stop();
 | `rootUri` | `string` | Yes | Root URI of the workspace |
 | `workspaceFolders` | `{ uri: string; name: string }[]` | No | Workspace folders |
 | `logger` | `Logger` | No | Logger for debug output |
+| `cwd` | `string` | No | Working directory for the server process |
+| `socket` | `{ port: number; host?: string }` | No | Socket connection options |
 
 #### Methods
 
@@ -96,67 +180,111 @@ The following LSP servers have been tested with this client:
 
 ## Running the Examples
 
+All examples are located in `src/examples/`. Build the project first:
+
+```bash
+npm install
+npm run build
+```
+
 ### TypeScript Example
 
 ```bash
-# Install dependencies
-npm install
-
 # Install TypeScript language server
 npm install -g typescript-language-server typescript
 
-# Run the TypeScript example
-npm run example
+# Run the example
+node dist/examples/example-typescript.js
+```
+
+### Python Example
+
+```bash
+# Set up pylsp in a separate directory
+mkdir -p ../pylsp && cd ../pylsp
+poetry init -n && poetry add python-lsp-server
+
+# Run the example
+node dist/examples/python-example.js
 ```
 
 ### Java Example
 
 ```bash
-# Install Eclipse JDT Language Server
-# See: https://github.com/eclipse/eclipse.jdt.ls
+# Install Eclipse JDT Language Server (macOS)
+brew install jdtls
 
-# Run the Java example
-npx tsx src/java-example.ts
+# Run the example
+node dist/examples/java-example.js
+```
+
+### Ruby Example
+
+```bash
+# Install Solargraph
+gem install solargraph
+
+# Run the example
+node dist/examples/ruby-example.js
+```
+
+### Rust Example
+
+```bash
+# Install rust-analyzer (macOS)
+brew install rust-analyzer
+
+# Or via rustup:
+rustup component add rust-analyzer
+
+# Run the example
+node dist/examples/rust-example.js
+```
+
+### C++ Example
+
+```bash
+# Install clangd (macOS)
+brew install llvm
+
+# Run the example
+node dist/examples/cpp-example.js
+```
+
+For best results with clangd, generate `compile_commands.json` in your project:
+```bash
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
 ```
 
 ### C# Example
 
 ```bash
-# Install csharp-ls (Roslyn-based C# language server)
+# Install csharp-ls
 dotnet tool install --global csharp-ls
 
-# Run the C# example (opens a random .cs file from ../CleanArchitecture)
-npx tsx src/csharp-example.ts
+# Run the example
+node dist/examples/csharp-example.js
 ```
 
-The C# example demonstrates:
-- Connecting to csharp-ls with a .NET solution
-- Opening an existing C# file from the codebase
-- Getting document symbols, hover info, completions, definitions, and references
-
-### C++ Example
+### Perl Example
 
 ```bash
-# Install clangd (C/C++ language server)
-# macOS:
-brew install llvm
+# Download PerlNavigator from GitHub releases
+# https://github.com/bscan/PerlNavigator/releases
 
-# Ubuntu/Debian:
-apt install clangd
-
-# Run the C++ example (opens a random .cpp/.h file from ../spdlog)
-npx tsx src/cpp-example.ts
+# Run the example
+node dist/examples/perl-example.js
 ```
 
-The C++ example demonstrates:
-- Connecting to clangd for C/C++ code intelligence
-- Opening an existing C++ file from the spdlog library
-- Getting document symbols (namespaces, classes, methods, fields)
-- Getting hover info, completions, definitions, and references
+### SQL Example
 
-For best results with clangd, generate `compile_commands.json` in your project:
 ```bash
-cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
+# Set up sql-language-server in a separate directory
+mkdir -p ../sql-lsp && cd ../sql-lsp
+npm init -y && npm install sql-language-server
+
+# Run the example
+node dist/examples/sql-example.js
 ```
 
 ### COBOL Example
@@ -165,15 +293,9 @@ cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON .
 # The Che4z COBOL Language Server requires Java and uses socket communication
 # Build the server JAR first (see Che4z documentation)
 
-# Run the COBOL example (connects to server on port 1044)
-npx tsx src/cobol-example.ts
+# Run the example (connects to server on port 1044)
+node dist/examples/cobol-example.js
 ```
-
-The COBOL example demonstrates:
-- Connecting to Che4z COBOL Language Server via socket (port 1044)
-- Opening COBOL source files (.cbl, .cob)
-- Getting document symbols (divisions, sections, paragraphs, variables)
-- Getting definitions and go-to-definition for PERFORM targets
 
 ## Socket vs Stdio Connections
 
@@ -198,90 +320,34 @@ const client = new LSPClient({
 });
 ```
 
-### Python Example
+## REST Bridge Server
 
-```bash
-# Set up pylsp in a separate directory
-mkdir -p ../pylsp && cd ../pylsp
-poetry init -n && poetry add python-lsp-server
+The `src/bridge/` directory contains a REST API bridge that exposes LSP functionality over HTTP:
 
-# Run the Python example
-npx tsx src/python-example.ts
+```typescript
+import { LSPBridgeServer } from 'mojo-lsp/bridge/bridge-server';
+
+const bridge = new LSPBridgeServer({
+  serverCommand: 'typescript-language-server',
+  serverArgs: ['--stdio'],
+  rootUri: 'file:///path/to/workspace',
+});
+
+await bridge.start(3000);  // Start HTTP server on port 3000
 ```
 
-The Python example demonstrates:
-- Connecting to pylsp (Python Language Server) via stdio
-- Using the `cwd` option to run the server from a different directory
-- Opening Python files and querying document symbols
+### Bridge API Endpoints
 
-### SQL Example
-
-```bash
-# Set up sql-language-server in a separate directory
-mkdir -p ../sql-lsp && cd ../sql-lsp
-npm init -y && npm install sql-language-server
-
-# Run the SQL example
-npx tsx src/sql-example.ts
-```
-
-The SQL example demonstrates:
-- Connecting to sql-language-server via stdio
-- Opening a virtual SQL document with CREATE TABLE and SELECT statements
-- Receiving diagnostics for SQL syntax errors
-
-### Rust Example
-
-```bash
-# Install rust-analyzer
-# macOS:
-brew install rust-analyzer
-
-# Or via rustup:
-rustup component add rust-analyzer
-
-# Run the Rust example
-npx tsx src/rust-example.ts
-```
-
-The Rust example demonstrates:
-- Connecting to rust-analyzer via stdio
-- Opening Rust source files from a Cargo project
-- Getting document symbols (structs, enums, impl blocks, functions, traits)
-- Getting hover info, completions, definitions, and references
-
-### Ruby Example
-
-```bash
-# Install solargraph
-gem install solargraph
-
-# Run the Ruby example
-npx tsx src/ruby-example.ts
-```
-
-The Ruby example demonstrates:
-- Connecting to Solargraph via stdio
-- Opening Ruby source files from a project with a Gemfile
-- Getting document symbols (classes, modules, methods)
-- Getting hover info with documentation, definitions, and references
-
-### Perl Example
-
-```bash
-# Download PerlNavigator from GitHub releases
-# https://github.com/bscan/PerlNavigator/releases
-# Place the binary in ~/code/perlnavigator/
-
-# Run the Perl example
-npx tsx src/perl-example.ts
-```
-
-The Perl example demonstrates:
-- Connecting to PerlNavigator via stdio
-- Opening a virtual Perl document with package, subroutines, and variables
-- Getting document symbols (packages, subroutines, variables)
-- Getting hover info, completions, definitions, and references
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/open` | POST | Open a document |
+| `/close` | POST | Close a document |
+| `/hover` | POST | Get hover information |
+| `/completion` | POST | Get completions |
+| `/definition` | POST | Go to definition |
+| `/references` | POST | Find references |
+| `/symbols` | POST | Get document symbols |
+| `/diagnostics` | GET | Get cached diagnostics |
 
 ## Development
 
