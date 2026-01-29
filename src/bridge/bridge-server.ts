@@ -1,6 +1,6 @@
 import express, { Request, Response, NextFunction, Router } from 'express';
 import { Server } from 'http';
-import { LSPClient, LSPClientOptions } from './lsp-client';
+import { LSPClient, LSPClientOptions } from '../lsp-client';
 import {
   DiagnosticsBuffer,
   StartBody,

@@ -1,5 +1,5 @@
 import { Diagnostic } from 'vscode-languageserver-protocol';
-import { LSPClient } from './lsp-client';
+import { LSPClient } from '../lsp-client';
 
 export interface DiagnosticsBuffer {
   [uri: string]: Diagnostic[];
