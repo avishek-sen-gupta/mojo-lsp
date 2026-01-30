@@ -27,16 +27,19 @@ src/
 │   ├── csharp-lsp-server.ts
 │   ├── cobol-lsp-server.ts
 │   └── sql-lsp-server.ts
-├── bridge/                # REST API bridge for LSP servers
-│   ├── bridge-server.ts
-│   ├── bridge-cli.ts
-│   └── bridge-types.ts
+├── bridge/                # REST API bridge for LSP servers (Fastify)
+│   ├── bridge-server.ts   # Main server with OpenAPI docs
+│   ├── bridge-cli.ts      # CLI entry point
+│   ├── bridge-types.ts    # TypeScript type definitions
+│   └── schemas/           # Auto-generated JSON schemas
 └── examples/              # Example usage for each language
     ├── example-typescript.ts
     ├── python-example.ts
     ├── java-example.ts
     ├── ruby-example.ts
     └── ...
+scripts/
+└── generate-schemas.ts    # Generates JSON schemas from TypeScript types
 ```
 
 ## Usage
@@ -322,42 +325,168 @@ const client = new LSPClient({
 
 ## REST Bridge Server
 
-The `src/bridge/` directory contains a REST API bridge that exposes LSP functionality over HTTP:
+The `src/bridge/` directory contains a REST API bridge that exposes LSP functionality over HTTP. Built with Fastify, it supports multiple programming languages and includes OpenAPI documentation.
+
+### Running the Bridge Server
+
+```bash
+# Build first
+npm run build
+
+# Run directly with tsx (no build needed for development)
+npx tsx src/bridge/bridge-cli.ts --port 3013
+
+# Or run the compiled version
+node dist/bridge/bridge-cli.js --port 3013
+```
+
+The server provides:
+- **OpenAPI documentation** at `http://localhost:3013/documentation`
+- **OpenAPI JSON spec** at `http://localhost:3013/documentation/json`
+
+### Programmatic Usage
 
 ```typescript
 import { LSPBridgeServer } from 'mojo-lsp/bridge/bridge-server';
 
-const bridge = new LSPBridgeServer({
-  serverCommand: 'typescript-language-server',
-  serverArgs: ['--stdio'],
-  rootUri: 'file:///path/to/workspace',
-});
+const bridge = new LSPBridgeServer(3013);
+await bridge.start();
 
-await bridge.start(3000);  // Start HTTP server on port 3000
+// Later...
+await bridge.stop();
 ```
+
+### Supported Languages
+
+The bridge server supports starting LSP servers for multiple languages:
+
+| Language | Required Fields |
+|----------|-----------------|
+| TypeScript | `language`, `rootUri` |
+| Python | `language`, `rootUri`, `serverDir` |
+| Java | `language`, `rootUri` |
+| Rust | `language`, `rootUri` |
+| Ruby | `language`, `rootUri` |
+| Perl | `language`, `rootUri`, `serverPath` |
+| C/C++ | `language`, `rootUri` |
+| C# | `language`, `rootUri`, `solutionPath` |
+| SQL | `language`, `rootUri`, `serverPath` |
+| COBOL | `language`, `rootUri`, `serverJar` |
 
 ### Bridge API Endpoints
 
+#### Lifecycle
+
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `/open` | POST | Open a document |
-| `/close` | POST | Close a document |
-| `/hover` | POST | Get hover information |
-| `/completion` | POST | Get completions |
-| `/definition` | POST | Go to definition |
-| `/references` | POST | Find references |
+| `/start` | POST | Start an LSP server for the specified language |
+| `/stop` | POST | Stop the running LSP server |
+| `/status` | GET | Get the status of the LSP server |
+
+#### Document Operations
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/document/open` | POST | Open a text document |
+| `/document/change` | POST | Update a text document |
+| `/document/close` | POST | Close a text document |
+
+#### LSP Features
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/completion` | POST | Get code completions at a position |
+| `/hover` | POST | Get hover information at a position |
+| `/definition` | POST | Go to definition at a position |
+| `/references` | POST | Find all references at a position |
 | `/symbols` | POST | Get document symbols |
-| `/diagnostics` | GET | Get cached diagnostics |
+
+#### Diagnostics
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/diagnostics` | GET | Get cached diagnostics for all files |
+| `/diagnostics` | DELETE | Clear all cached diagnostics |
+
+### Example: Using the Bridge with curl
+
+```bash
+# Start a TypeScript LSP server
+curl -X POST http://localhost:3013/start \
+  -H "Content-Type: application/json" \
+  -d '{"language": "typescript", "rootUri": "file:///path/to/project"}'
+
+# Open a document
+curl -X POST http://localhost:3013/document/open \
+  -H "Content-Type: application/json" \
+  -d '{
+    "uri": "file:///path/to/project/src/index.ts",
+    "languageId": "typescript",
+    "text": "const x: number = 1;\nfunction add(a: number, b: number) { return a + b; }"
+  }'
+
+# Get document symbols
+curl -X POST http://localhost:3013/symbols \
+  -H "Content-Type: application/json" \
+  -d '{"uri": "file:///path/to/project/src/index.ts"}'
+
+# Get hover information
+curl -X POST http://localhost:3013/hover \
+  -H "Content-Type: application/json" \
+  -d '{"uri": "file:///path/to/project/src/index.ts", "line": 1, "character": 10}'
+
+# Stop the server
+curl -X POST http://localhost:3013/stop
+```
+
+### Example: Starting Different Language Servers
+
+```bash
+# Rust (requires rust-analyzer)
+curl -X POST http://localhost:3013/start \
+  -H "Content-Type: application/json" \
+  -d '{"language": "rust", "rootUri": "file:///path/to/rust/project"}'
+
+# C++ (requires clangd)
+curl -X POST http://localhost:3013/start \
+  -H "Content-Type: application/json" \
+  -d '{"language": "cpp", "rootUri": "file:///path/to/cpp/project"}'
+
+# COBOL (requires Che4z COBOL LSP server JAR)
+curl -X POST http://localhost:3013/start \
+  -H "Content-Type: application/json" \
+  -d '{
+    "language": "cobol",
+    "rootUri": "file:///path/to/cobol/project",
+    "serverJar": "/path/to/server.jar"
+  }'
+```
 
 ## Development
 
 ```bash
-# Build
+# Install dependencies
+npm install
+
+# Generate JSON schemas from TypeScript types
+npm run generate:schemas
+
+# Build (includes schema generation)
 npm run build
 
 # Clean
 npm run clean
 ```
+
+### Schema Generation
+
+The bridge server uses JSON schemas generated from TypeScript types for request validation and OpenAPI documentation. Schemas are auto-generated from `src/bridge/bridge-types.ts`:
+
+```bash
+npm run generate:schemas
+```
+
+This creates `src/bridge/schemas/index.ts` with Fastify-compatible schemas.
 
 ## License
 
