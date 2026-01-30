@@ -5,22 +5,30 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "npm run generate:schemas && tsc",
+    "generate:schemas": "npx tsx scripts/generate-schemas.ts",
     "example": "tsc && node dist/example.js",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist src/bridge/schemas"
   },
-  "keywords": ["lsp", "language-server-protocol"],
+  "keywords": [
+    "lsp",
+    "language-server-protocol"
+  ],
   "author": "",
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {
     "@fastify/cors": "^10.0.2",
+    "@fastify/swagger": "^9.6.1",
+    "@fastify/swagger-ui": "^5.2.5",
     "fastify": "^5.2.1",
     "vscode-jsonrpc": "^8.2.1",
     "vscode-languageserver-protocol": "^3.17.5"
   },
   "devDependencies": {
     "@types/node": "^25.0.10",
+    "ts-json-schema-generator": "^2.4.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
 }

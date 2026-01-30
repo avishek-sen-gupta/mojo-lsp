@@ -2,10 +2,12 @@ import Fastify, {
   FastifyInstance,
   FastifyRequest,
   FastifyReply,
-  RouteShorthandOptions,
 } from 'fastify';
 import cors from '@fastify/cors';
+import swagger from '@fastify/swagger';
+import swaggerUi from '@fastify/swagger-ui';
 import { LSPClient } from '../lsp-client';
+import { schemas } from './schemas';
 import {
   StartBody,
   DocumentOpenBody,
@@ -219,7 +221,17 @@ type DiagnosticsDeleteRoute = {
 // Route registrars
 
 function registerLifecycleRoutes(app: FastifyInstance, state: BridgeState): void {
-  app.post<StartRoute>('/start', async (request, reply) => {
+  app.post<StartRoute>('/start', {
+    schema: {
+      description: 'Start an LSP server for the specified language',
+      tags: ['lifecycle'],
+      body: { $ref: 'StartBody#' },
+      response: {
+        200: { type: 'object', description: 'LSP server capabilities' },
+        400: { $ref: 'ErrorResponse#' },
+      },
+    },
+  }, async (request, reply) => {
     if (state.client) {
       reply.code(400);
       return { error: 'LSP server already running. Stop it first.' };
@@ -263,7 +275,16 @@ function registerLifecycleRoutes(app: FastifyInstance, state: BridgeState): void
     }
   });
 
-  app.post<StopRoute>('/stop', async () => {
+  app.post<StopRoute>('/stop', {
+    schema: {
+      description: 'Stop the running LSP server',
+      tags: ['lifecycle'],
+      response: {
+        200: { $ref: 'SuccessResponse#' },
+        400: { $ref: 'ErrorResponse#' },
+      },
+    },
+  }, async () => {
     if (state.client) {
       await state.client.stop();
       state.client = null;
@@ -273,7 +294,22 @@ function registerLifecycleRoutes(app: FastifyInstance, state: BridgeState): void
     return { success: true };
   });
 
-  app.get<StatusRoute>('/status', async () => {
+  app.get<StatusRoute>('/status', {
+    schema: {
+      description: 'Get the status of the LSP server',
+      tags: ['lifecycle'],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            running: { type: 'boolean' },
+            language: { type: 'string' },
+            capabilities: { type: 'object' },
+          },
+        },
+      },
+    },
+  }, async () => {
     if (!state.client) {
       return { running: false };
     }
@@ -295,11 +331,18 @@ function registerDocumentRoutes(app: FastifyInstance, state: BridgeState): void 
     }
   };
 
-  const routeOpts: RouteShorthandOptions = {
+  app.post<DocumentOpenRoute>('/document/open', {
     preHandler: requireClient,
-  };
-
-  app.post<DocumentOpenRoute>('/document/open', routeOpts, async (request, reply) => {
+    schema: {
+      description: 'Open a text document',
+      tags: ['document'],
+      body: { $ref: 'DocumentOpenBody#' },
+      response: {
+        200: { $ref: 'SuccessResponse#' },
+        400: { $ref: 'ErrorResponse#' },
+      },
+    },
+  }, async (request, reply) => {
     const { uri, languageId, text } = request.body;
 
     if (!uri) {
@@ -319,7 +362,18 @@ function registerDocumentRoutes(app: FastifyInstance, state: BridgeState): void 
     return { success: true };
   });
 
-  app.post<DocumentChangeRoute>('/document/change', routeOpts, async (request, reply) => {
+  app.post<DocumentChangeRoute>('/document/change', {
+    preHandler: requireClient,
+    schema: {
+      description: 'Update a text document',
+      tags: ['document'],
+      body: { $ref: 'DocumentChangeBody#' },
+      response: {
+        200: { $ref: 'SuccessResponse#' },
+        400: { $ref: 'ErrorResponse#' },
+      },
+    },
+  }, async (request, reply) => {
     const { uri, text } = request.body;
 
     if (!uri) {
@@ -335,7 +389,18 @@ function registerDocumentRoutes(app: FastifyInstance, state: BridgeState): void 
     return { success: true };
   });
 
-  app.post<DocumentCloseRoute>('/document/close', routeOpts, async (request, reply) => {
+  app.post<DocumentCloseRoute>('/document/close', {
+    preHandler: requireClient,
+    schema: {
+      description: 'Close a text document',
+      tags: ['document'],
+      body: { $ref: 'DocumentCloseBody#' },
+      response: {
+        200: { $ref: 'SuccessResponse#' },
+        400: { $ref: 'ErrorResponse#' },
+      },
+    },
+  }, async (request, reply) => {
     const { uri } = request.body;
 
     if (!uri) {
@@ -358,11 +423,18 @@ function registerFeatureRoutes(app: FastifyInstance, state: BridgeState): void {
     }
   };
 
-  const routeOpts: RouteShorthandOptions = {
+  app.post<CompletionRoute>('/completion', {
     preHandler: requireClient,
-  };
-
-  app.post<CompletionRoute>('/completion', routeOpts, async (request, reply) => {
+    schema: {
+      description: 'Get code completions at a position',
+      tags: ['features'],
+      body: { $ref: 'PositionBody#' },
+      response: {
+        200: { type: 'object', properties: { items: { type: ['array', 'object', 'null'] } } },
+        400: { $ref: 'ErrorResponse#' },
+      },
+    },
+  }, async (request, reply) => {
     const { uri, line, character } = request.body;
 
     if (!uri) {
@@ -382,7 +454,18 @@ function registerFeatureRoutes(app: FastifyInstance, state: BridgeState): void {
     return { items: result };
   });
 
-  app.post<HoverRoute>('/hover', routeOpts, async (request, reply) => {
+  app.post<HoverRoute>('/hover', {
+    preHandler: requireClient,
+    schema: {
+      description: 'Get hover information at a position',
+      tags: ['features'],
+      body: { $ref: 'PositionBody#' },
+      response: {
+        200: { type: 'object', properties: { hover: { type: ['object', 'null'] } } },
+        400: { $ref: 'ErrorResponse#' },
+      },
+    },
+  }, async (request, reply) => {
     const { uri, line, character } = request.body;
 
     if (!uri) {
@@ -402,7 +485,18 @@ function registerFeatureRoutes(app: FastifyInstance, state: BridgeState): void {
     return { hover: result };
   });
 
-  app.post<DefinitionRoute>('/definition', routeOpts, async (request, reply) => {
+  app.post<DefinitionRoute>('/definition', {
+    preHandler: requireClient,
+    schema: {
+      description: 'Go to definition at a position',
+      tags: ['features'],
+      body: { $ref: 'PositionBody#' },
+      response: {
+        200: { type: 'object', properties: { locations: { type: ['array', 'null'] } } },
+        400: { $ref: 'ErrorResponse#' },
+      },
+    },
+  }, async (request, reply) => {
     const { uri, line, character } = request.body;
 
     if (!uri) {
@@ -422,7 +516,18 @@ function registerFeatureRoutes(app: FastifyInstance, state: BridgeState): void {
     return { locations: result };
   });
 
-  app.post<ReferencesRoute>('/references', routeOpts, async (request, reply) => {
+  app.post<ReferencesRoute>('/references', {
+    preHandler: requireClient,
+    schema: {
+      description: 'Find all references at a position',
+      tags: ['features'],
+      body: { $ref: 'ReferencesBody#' },
+      response: {
+        200: { type: 'object', properties: { locations: { type: ['array', 'null'] } } },
+        400: { $ref: 'ErrorResponse#' },
+      },
+    },
+  }, async (request, reply) => {
     const { uri, line, character, includeDeclaration = true } = request.body;
 
     if (!uri) {
@@ -442,7 +547,18 @@ function registerFeatureRoutes(app: FastifyInstance, state: BridgeState): void {
     return { locations: result };
   });
 
-  app.post<SymbolsRoute>('/symbols', routeOpts, async (request, reply) => {
+  app.post<SymbolsRoute>('/symbols', {
+    preHandler: requireClient,
+    schema: {
+      description: 'Get document symbols',
+      tags: ['features'],
+      body: { $ref: 'SymbolsBody#' },
+      response: {
+        200: { type: 'object', properties: { symbols: { type: ['array', 'null'] } } },
+        400: { $ref: 'ErrorResponse#' },
+      },
+    },
+  }, async (request, reply) => {
     const { uri } = request.body;
 
     if (!uri) {
@@ -456,7 +572,15 @@ function registerFeatureRoutes(app: FastifyInstance, state: BridgeState): void {
 }
 
 function registerDiagnosticsRoutes(app: FastifyInstance, state: BridgeState): void {
-  app.get<DiagnosticsGetRoute>('/diagnostics', async () => {
+  app.get<DiagnosticsGetRoute>('/diagnostics', {
+    schema: {
+      description: 'Get cached diagnostics for all files',
+      tags: ['diagnostics'],
+      response: {
+        200: { type: 'object', properties: { diagnostics: { type: 'object' } } },
+      },
+    },
+  }, async () => {
     const diagnostics: DiagnosticsBuffer = {};
     state.diagnosticsBuffer.forEach((diags, uri) => {
       diagnostics[uri] = diags;
@@ -464,7 +588,15 @@ function registerDiagnosticsRoutes(app: FastifyInstance, state: BridgeState): vo
     return { diagnostics };
   });
 
-  app.delete<DiagnosticsDeleteRoute>('/diagnostics', async () => {
+  app.delete<DiagnosticsDeleteRoute>('/diagnostics', {
+    schema: {
+      description: 'Clear all cached diagnostics',
+      tags: ['diagnostics'],
+      response: {
+        200: { $ref: 'SuccessResponse#' },
+      },
+    },
+  }, async () => {
     state.diagnosticsBuffer.clear();
     return { success: true };
   });
@@ -492,6 +624,33 @@ export class LSPBridgeServer {
       logger: false,
     });
 
+    // Register Swagger
+    app.register(swagger, {
+      openapi: {
+        info: {
+          title: 'LSP Bridge Server API',
+          description: 'REST API bridge for Language Server Protocol servers',
+          version: '1.0.0',
+        },
+        servers: [{ url: `http://localhost:${this.port}` }],
+        tags: [
+          { name: 'lifecycle', description: 'Server lifecycle management' },
+          { name: 'document', description: 'Document operations' },
+          { name: 'features', description: 'LSP features (completion, hover, etc.)' },
+          { name: 'diagnostics', description: 'Diagnostics management' },
+        ],
+      },
+    });
+
+    app.register(swaggerUi, {
+      routePrefix: '/documentation',
+    });
+
+    // Add schemas from generated definitions
+    for (const [name, schema] of Object.entries(schemas)) {
+      app.addSchema({ $id: name, ...schema });
+    }
+
     // Register CORS
     app.register(cors, {
       origin: '*',
@@ -499,11 +658,14 @@ export class LSPBridgeServer {
       allowedHeaders: ['Content-Type'],
     });
 
-    // Register routes
-    registerLifecycleRoutes(app, this.state);
-    registerDocumentRoutes(app, this.state);
-    registerFeatureRoutes(app, this.state);
-    registerDiagnosticsRoutes(app, this.state);
+    // Register routes as a plugin so swagger can discover them
+    const state = this.state;
+    app.register(async (app) => {
+      registerLifecycleRoutes(app, state);
+      registerDocumentRoutes(app, state);
+      registerFeatureRoutes(app, state);
+      registerDiagnosticsRoutes(app, state);
+    });
 
     // Error handler
     app.setErrorHandler(async (error: Error, _request, reply) => {
