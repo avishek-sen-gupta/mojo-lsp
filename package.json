@@ -8,7 +8,18 @@
     "build": "npm run generate:schemas && tsc",
     "generate:schemas": "npx tsx scripts/generate-schemas.ts",
     "example": "tsc && node dist/example.js",
-    "clean": "rm -rf dist src/bridge/schemas"
+    "clean": "rm -rf dist src/bridge/schemas",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:typescript": "vitest run typescript-lsp",
+    "test:rust": "vitest run rust-lsp",
+    "test:cpp": "vitest run cpp-lsp",
+    "test:java": "vitest run java-lsp",
+    "test:python": "vitest run python-lsp",
+    "test:ruby": "vitest run ruby-lsp",
+    "test:csharp": "vitest run csharp-lsp",
+    "test:sql": "vitest run sql-lsp",
+    "test:cobol": "vitest run cobol-lsp"
   },
   "keywords": [
     "lsp",
@@ -29,6 +40,7 @@
     "@types/node": "^25.0.10",
     "ts-json-schema-generator": "^2.4.0",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }
