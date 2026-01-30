@@ -1,235 +1,479 @@
-import express, { Request, Response, NextFunction, Router } from 'express';
-import { Server } from 'http';
-import { LSPClient, LSPClientOptions } from '../lsp-client';
+import Fastify, {
+  FastifyInstance,
+  FastifyRequest,
+  FastifyReply,
+  RouteShorthandOptions,
+} from 'fastify';
+import cors from '@fastify/cors';
+import { LSPClient } from '../lsp-client';
 import {
-  DiagnosticsBuffer,
   StartBody,
-  DocumentBody,
+  DocumentOpenBody,
+  DocumentChangeBody,
+  DocumentCloseBody,
   PositionBody,
+  ReferencesBody,
+  SymbolsBody,
   BridgeState,
   BadRequestError,
+  DiagnosticsBuffer,
+  ErrorResponse,
+  SuccessResponse,
+  StartResponse,
+  StatusResponse,
+  CompletionResponse,
+  HoverResponse,
+  DefinitionResponse,
+  ReferencesResponse,
+  SymbolsResponse,
+  DiagnosticsResponse,
+  SupportedLanguage,
+  TypescriptStartBody,
+  PythonStartBody,
+  JavaStartBody,
+  RustStartBody,
+  RubyStartBody,
+  PerlStartBody,
+  CppStartBody,
+  CsharpStartBody,
+  SqlStartBody,
+  CobolStartBody,
 } from './bridge-types';
 
-// Route factories
+// LSP server factory imports
+import { createTypescriptLspClient } from '../lsp-server/typescript-lsp-server';
+import { createPythonLspClient } from '../lsp-server/python-lsp-server';
+import { createJavaLspClient } from '../lsp-server/java-lsp-server';
+import { createRustLspClient } from '../lsp-server/rust-lsp-server';
+import { createRubyLspClient } from '../lsp-server/ruby-lsp-server';
+import { createPerlLspClient } from '../lsp-server/perl-lsp-server';
+import { createCppLspClient } from '../lsp-server/cpp-lsp-server';
+import { createCsharpLspClient } from '../lsp-server/csharp-lsp-server';
+import { createSqlLspClient } from '../lsp-server/sql-lsp-server';
+import { createCobolLspClient } from '../lsp-server/cobol-lsp-server';
 
-function createLifecycleRoutes(state: BridgeState): Router {
-  const router = Router();
-
-  router.post('/start', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      if (state.client) {
-        throw new BadRequestError('LSP server already running. Stop it first.');
+// Factory function to create LSP client based on language
+function createLspClientForLanguage(body: StartBody): LSPClient {
+  switch (body.language) {
+    case 'typescript': {
+      const opts = body as TypescriptStartBody;
+      return createTypescriptLspClient({
+        rootUri: opts.rootUri,
+        serverArgs: opts.serverArgs,
+      });
+    }
+    case 'python': {
+      const opts = body as PythonStartBody;
+      if (!opts.serverDir) {
+        throw new BadRequestError('serverDir is required for Python');
       }
+      return createPythonLspClient({
+        rootUri: opts.rootUri,
+        serverDir: opts.serverDir,
+        serverArgs: opts.serverArgs,
+      });
+    }
+    case 'java': {
+      const opts = body as JavaStartBody;
+      return createJavaLspClient({
+        rootUri: opts.rootUri,
+        serverArgs: opts.serverArgs,
+      });
+    }
+    case 'rust': {
+      const opts = body as RustStartBody;
+      return createRustLspClient({
+        rootUri: opts.rootUri,
+        serverArgs: opts.serverArgs,
+      });
+    }
+    case 'ruby': {
+      const opts = body as RubyStartBody;
+      return createRubyLspClient({
+        rootUri: opts.rootUri,
+        cwd: opts.cwd,
+        serverArgs: opts.serverArgs,
+      });
+    }
+    case 'perl': {
+      const opts = body as PerlStartBody;
+      if (!opts.serverPath) {
+        throw new BadRequestError('serverPath is required for Perl');
+      }
+      return createPerlLspClient({
+        rootUri: opts.rootUri,
+        serverPath: opts.serverPath,
+        serverArgs: opts.serverArgs,
+      });
+    }
+    case 'cpp': {
+      const opts = body as CppStartBody;
+      return createCppLspClient({
+        rootUri: opts.rootUri,
+        serverArgs: opts.serverArgs,
+      });
+    }
+    case 'csharp': {
+      const opts = body as CsharpStartBody;
+      if (!opts.solutionPath) {
+        throw new BadRequestError('solutionPath is required for C#');
+      }
+      return createCsharpLspClient({
+        rootUri: opts.rootUri,
+        solutionPath: opts.solutionPath,
+        logLevel: opts.logLevel,
+        serverArgs: opts.serverArgs,
+      });
+    }
+    case 'sql': {
+      const opts = body as SqlStartBody;
+      if (!opts.serverPath) {
+        throw new BadRequestError('serverPath is required for SQL');
+      }
+      return createSqlLspClient({
+        rootUri: opts.rootUri,
+        serverPath: opts.serverPath,
+        serverArgs: opts.serverArgs,
+      });
+    }
+    case 'cobol': {
+      const opts = body as CobolStartBody;
+      if (!opts.serverJar) {
+        throw new BadRequestError('serverJar is required for COBOL');
+      }
+      return createCobolLspClient({
+        rootUri: opts.rootUri,
+        serverJar: opts.serverJar,
+        port: opts.port,
+        host: opts.host,
+      });
+    }
+    default:
+      throw new BadRequestError(`Unsupported language: ${(body as StartBody).language}`);
+  }
+}
 
-      const { serverCommand, serverArgs, rootUri, cwd, socket } = req.body as StartBody;
+// Route option types for strongly typed handlers
 
-      if (!serverCommand) throw new BadRequestError('serverCommand is required');
-      if (!rootUri) throw new BadRequestError('rootUri is required');
+type StartRoute = {
+  Body: StartBody;
+  Reply: StartResponse | ErrorResponse;
+};
 
-      const options: LSPClientOptions = { serverCommand, serverArgs, rootUri, cwd, socket };
-      state.client = new LSPClient(options);
+type StopRoute = {
+  Reply: SuccessResponse | ErrorResponse;
+};
+
+type StatusRoute = {
+  Reply: StatusResponse;
+};
+
+type DocumentOpenRoute = {
+  Body: DocumentOpenBody;
+  Reply: SuccessResponse | ErrorResponse;
+};
+
+type DocumentChangeRoute = {
+  Body: DocumentChangeBody;
+  Reply: SuccessResponse | ErrorResponse;
+};
+
+type DocumentCloseRoute = {
+  Body: DocumentCloseBody;
+  Reply: SuccessResponse | ErrorResponse;
+};
+
+type CompletionRoute = {
+  Body: PositionBody;
+  Reply: CompletionResponse | ErrorResponse;
+};
+
+type HoverRoute = {
+  Body: PositionBody;
+  Reply: HoverResponse | ErrorResponse;
+};
+
+type DefinitionRoute = {
+  Body: PositionBody;
+  Reply: DefinitionResponse | ErrorResponse;
+};
+
+type ReferencesRoute = {
+  Body: ReferencesBody;
+  Reply: ReferencesResponse | ErrorResponse;
+};
+
+type SymbolsRoute = {
+  Body: SymbolsBody;
+  Reply: SymbolsResponse | ErrorResponse;
+};
+
+type DiagnosticsGetRoute = {
+  Reply: DiagnosticsResponse;
+};
+
+type DiagnosticsDeleteRoute = {
+  Reply: SuccessResponse;
+};
+
+// Route registrars
+
+function registerLifecycleRoutes(app: FastifyInstance, state: BridgeState): void {
+  app.post<StartRoute>('/start', async (request, reply) => {
+    if (state.client) {
+      reply.code(400);
+      return { error: 'LSP server already running. Stop it first.' };
+    }
+
+    const body = request.body;
+
+    if (!body.language) {
+      reply.code(400);
+      return { error: 'language is required' };
+    }
+    if (!body.rootUri) {
+      reply.code(400);
+      return { error: 'rootUri is required' };
+    }
+
+    // Validate language
+    const supportedLanguages: SupportedLanguage[] = [
+      'typescript', 'python', 'java', 'rust', 'ruby',
+      'perl', 'cpp', 'csharp', 'sql', 'cobol',
+    ];
+    if (!supportedLanguages.includes(body.language)) {
+      reply.code(400);
+      return { error: `Unsupported language: ${body.language}. Supported: ${supportedLanguages.join(', ')}` };
+    }
+
+    try {
+      state.client = createLspClientForLanguage(body);
+      state.language = body.language;
 
       state.client.onDiagnostics((params) => {
         state.diagnosticsBuffer.set(params.uri, params.diagnostics);
       });
 
       const capabilities = await state.client.start();
-      res.json({ capabilities });
+      return { capabilities };
     } catch (err) {
-      next(err);
+      state.client = null;
+      state.language = null;
+      throw err;
     }
   });
 
-  router.post('/stop', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      if (state.client) {
-        await state.client.stop();
-        state.client = null;
-        state.diagnosticsBuffer.clear();
-      }
-      res.json({ success: true });
-    } catch (err) {
-      next(err);
+  app.post<StopRoute>('/stop', async () => {
+    if (state.client) {
+      await state.client.stop();
+      state.client = null;
+      state.language = null;
+      state.diagnosticsBuffer.clear();
     }
+    return { success: true };
   });
 
-  router.get('/status', (req: Request, res: Response) => {
+  app.get<StatusRoute>('/status', async () => {
     if (!state.client) {
-      res.json({ running: false });
-      return;
+      return { running: false };
     }
-    res.json({
+    return {
       running: true,
+      language: state.language ?? undefined,
       capabilities: state.client.getServerCapabilities(),
-    });
+    };
   });
-
-  return router;
 }
 
-function createDocumentRoutes(state: BridgeState): Router {
-  const router = Router();
-
-  const requireClient = (req: Request, res: Response, next: NextFunction) => {
+function registerDocumentRoutes(app: FastifyInstance, state: BridgeState): void {
+  const requireClient = async (
+    _request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<void> => {
     if (!state.client) {
-      next(new BadRequestError('LSP server not running. Call /start first.'));
-      return;
+      reply.code(400).send({ error: 'LSP server not running. Call /start first.' });
     }
-    next();
   };
 
-  router.use(requireClient);
-
-  router.post('/open', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { uri, languageId, text } = req.body as DocumentBody;
-      if (!uri) throw new BadRequestError('uri is required');
-      if (!languageId) throw new BadRequestError('languageId is required');
-      if (text === undefined) throw new BadRequestError('text is required');
-
-      await state.client!.openDocument(uri, languageId, text);
-      res.json({ success: true });
-    } catch (err) {
-      next(err);
-    }
-  });
-
-  router.post('/change', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { uri, text } = req.body as DocumentBody;
-      if (!uri) throw new BadRequestError('uri is required');
-      if (text === undefined) throw new BadRequestError('text is required');
-
-      await state.client!.changeDocument(uri, text);
-      res.json({ success: true });
-    } catch (err) {
-      next(err);
-    }
-  });
-
-  router.post('/close', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { uri } = req.body as DocumentBody;
-      if (!uri) throw new BadRequestError('uri is required');
-
-      await state.client!.closeDocument(uri);
-      res.json({ success: true });
-    } catch (err) {
-      next(err);
-    }
-  });
-
-  return router;
-}
-
-function createFeatureRoutes(state: BridgeState): Router {
-  const router = Router();
-
-  const requireClient = (req: Request, res: Response, next: NextFunction) => {
-    if (!state.client) {
-      next(new BadRequestError('LSP server not running. Call /start first.'));
-      return;
-    }
-    next();
+  const routeOpts: RouteShorthandOptions = {
+    preHandler: requireClient,
   };
 
-  router.use(requireClient);
+  app.post<DocumentOpenRoute>('/document/open', routeOpts, async (request, reply) => {
+    const { uri, languageId, text } = request.body;
 
-  router.post('/completion', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { uri, line, character } = req.body as PositionBody;
-      if (!uri) throw new BadRequestError('uri is required');
-      if (line === undefined) throw new BadRequestError('line is required');
-      if (character === undefined) throw new BadRequestError('character is required');
-
-      const result = await state.client!.getCompletion(uri, line, character);
-      res.json({ items: result });
-    } catch (err) {
-      next(err);
+    if (!uri) {
+      reply.code(400);
+      return { error: 'uri is required' };
     }
+    if (!languageId) {
+      reply.code(400);
+      return { error: 'languageId is required' };
+    }
+    if (text === undefined) {
+      reply.code(400);
+      return { error: 'text is required' };
+    }
+
+    await state.client!.openDocument(uri, languageId, text);
+    return { success: true };
   });
 
-  router.post('/hover', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { uri, line, character } = req.body as PositionBody;
-      if (!uri) throw new BadRequestError('uri is required');
-      if (line === undefined) throw new BadRequestError('line is required');
-      if (character === undefined) throw new BadRequestError('character is required');
+  app.post<DocumentChangeRoute>('/document/change', routeOpts, async (request, reply) => {
+    const { uri, text } = request.body;
 
-      const result = await state.client!.getHover(uri, line, character);
-      res.json({ hover: result });
-    } catch (err) {
-      next(err);
+    if (!uri) {
+      reply.code(400);
+      return { error: 'uri is required' };
     }
+    if (text === undefined) {
+      reply.code(400);
+      return { error: 'text is required' };
+    }
+
+    await state.client!.changeDocument(uri, text);
+    return { success: true };
   });
 
-  router.post('/definition', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { uri, line, character } = req.body as PositionBody;
-      if (!uri) throw new BadRequestError('uri is required');
-      if (line === undefined) throw new BadRequestError('line is required');
-      if (character === undefined) throw new BadRequestError('character is required');
+  app.post<DocumentCloseRoute>('/document/close', routeOpts, async (request, reply) => {
+    const { uri } = request.body;
 
-      const result = await state.client!.getDefinition(uri, line, character);
-      res.json({ locations: result });
-    } catch (err) {
-      next(err);
+    if (!uri) {
+      reply.code(400);
+      return { error: 'uri is required' };
     }
+
+    await state.client!.closeDocument(uri);
+    return { success: true };
   });
-
-  router.post('/references', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { uri, line, character, includeDeclaration = true } = req.body as PositionBody;
-      if (!uri) throw new BadRequestError('uri is required');
-      if (line === undefined) throw new BadRequestError('line is required');
-      if (character === undefined) throw new BadRequestError('character is required');
-
-      const result = await state.client!.getReferences(uri, line, character, includeDeclaration);
-      res.json({ locations: result });
-    } catch (err) {
-      next(err);
-    }
-  });
-
-  router.post('/symbols', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { uri } = req.body as PositionBody;
-      if (!uri) throw new BadRequestError('uri is required');
-
-      const result = await state.client!.getDocumentSymbols(uri);
-      res.json({ symbols: result });
-    } catch (err) {
-      next(err);
-    }
-  });
-
-  return router;
 }
 
-function createDiagnosticsRoutes(state: BridgeState): Router {
-  const router = Router();
+function registerFeatureRoutes(app: FastifyInstance, state: BridgeState): void {
+  const requireClient = async (
+    _request: FastifyRequest,
+    reply: FastifyReply
+  ): Promise<void> => {
+    if (!state.client) {
+      reply.code(400).send({ error: 'LSP server not running. Call /start first.' });
+    }
+  };
 
-  router.get('/', (req: Request, res: Response) => {
+  const routeOpts: RouteShorthandOptions = {
+    preHandler: requireClient,
+  };
+
+  app.post<CompletionRoute>('/completion', routeOpts, async (request, reply) => {
+    const { uri, line, character } = request.body;
+
+    if (!uri) {
+      reply.code(400);
+      return { error: 'uri is required' };
+    }
+    if (line === undefined) {
+      reply.code(400);
+      return { error: 'line is required' };
+    }
+    if (character === undefined) {
+      reply.code(400);
+      return { error: 'character is required' };
+    }
+
+    const result = await state.client!.getCompletion(uri, line, character);
+    return { items: result };
+  });
+
+  app.post<HoverRoute>('/hover', routeOpts, async (request, reply) => {
+    const { uri, line, character } = request.body;
+
+    if (!uri) {
+      reply.code(400);
+      return { error: 'uri is required' };
+    }
+    if (line === undefined) {
+      reply.code(400);
+      return { error: 'line is required' };
+    }
+    if (character === undefined) {
+      reply.code(400);
+      return { error: 'character is required' };
+    }
+
+    const result = await state.client!.getHover(uri, line, character);
+    return { hover: result };
+  });
+
+  app.post<DefinitionRoute>('/definition', routeOpts, async (request, reply) => {
+    const { uri, line, character } = request.body;
+
+    if (!uri) {
+      reply.code(400);
+      return { error: 'uri is required' };
+    }
+    if (line === undefined) {
+      reply.code(400);
+      return { error: 'line is required' };
+    }
+    if (character === undefined) {
+      reply.code(400);
+      return { error: 'character is required' };
+    }
+
+    const result = await state.client!.getDefinition(uri, line, character);
+    return { locations: result };
+  });
+
+  app.post<ReferencesRoute>('/references', routeOpts, async (request, reply) => {
+    const { uri, line, character, includeDeclaration = true } = request.body;
+
+    if (!uri) {
+      reply.code(400);
+      return { error: 'uri is required' };
+    }
+    if (line === undefined) {
+      reply.code(400);
+      return { error: 'line is required' };
+    }
+    if (character === undefined) {
+      reply.code(400);
+      return { error: 'character is required' };
+    }
+
+    const result = await state.client!.getReferences(uri, line, character, includeDeclaration);
+    return { locations: result };
+  });
+
+  app.post<SymbolsRoute>('/symbols', routeOpts, async (request, reply) => {
+    const { uri } = request.body;
+
+    if (!uri) {
+      reply.code(400);
+      return { error: 'uri is required' };
+    }
+
+    const result = await state.client!.getDocumentSymbols(uri);
+    return { symbols: result };
+  });
+}
+
+function registerDiagnosticsRoutes(app: FastifyInstance, state: BridgeState): void {
+  app.get<DiagnosticsGetRoute>('/diagnostics', async () => {
     const diagnostics: DiagnosticsBuffer = {};
     state.diagnosticsBuffer.forEach((diags, uri) => {
       diagnostics[uri] = diags;
     });
-    res.json({ diagnostics });
+    return { diagnostics };
   });
 
-  router.delete('/', (req: Request, res: Response) => {
+  app.delete<DiagnosticsDeleteRoute>('/diagnostics', async () => {
     state.diagnosticsBuffer.clear();
-    res.json({ success: true });
+    return { success: true };
   });
-
-  return router;
 }
 
 // Main server class
 
 export class LSPBridgeServer {
-  private app: express.Application;
-  private server: Server | null = null;
+  private app: FastifyInstance;
   private port: number;
   private state: BridgeState;
 
@@ -237,65 +481,50 @@ export class LSPBridgeServer {
     this.port = port;
     this.state = {
       client: null,
+      language: null,
       diagnosticsBuffer: new Map(),
     };
     this.app = this.createApp();
   }
 
-  private createApp(): express.Application {
-    const app = express();
-
-    // Middleware
-    app.use(express.json());
-    app.use((req: Request, res: Response, next: NextFunction) => {
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-      if (req.method === 'OPTIONS') {
-        res.sendStatus(204);
-        return;
-      }
-      next();
+  private createApp(): FastifyInstance {
+    const app = Fastify({
+      logger: false,
     });
 
-    // Routes
-    app.use('/', createLifecycleRoutes(this.state));
-    app.use('/document', createDocumentRoutes(this.state));
-    app.use('/', createFeatureRoutes(this.state));
-    app.use('/diagnostics', createDiagnosticsRoutes(this.state));
+    // Register CORS
+    app.register(cors, {
+      origin: '*',
+      methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type'],
+    });
+
+    // Register routes
+    registerLifecycleRoutes(app, this.state);
+    registerDocumentRoutes(app, this.state);
+    registerFeatureRoutes(app, this.state);
+    registerDiagnosticsRoutes(app, this.state);
 
     // Error handler
-    app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-      const statusCode = err instanceof BadRequestError ? 400 : 500;
-      res.status(statusCode).json({ error: err.message });
+    app.setErrorHandler(async (error: Error, _request, reply) => {
+      const statusCode = error instanceof BadRequestError ? 400 : 500;
+      reply.code(statusCode).send({ error: error.message });
     });
 
     return app;
   }
 
-  start(): Promise<void> {
-    return new Promise((resolve) => {
-      this.server = this.app.listen(this.port, () => {
-        console.log(`LSP Bridge Server listening on port ${this.port}`);
-        resolve();
-      });
-    });
+  async start(): Promise<void> {
+    await this.app.listen({ port: this.port, host: '0.0.0.0' });
+    console.log(`LSP Bridge Server listening on port ${this.port}`);
   }
 
-  stop(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (this.state.client) {
-        this.state.client.stop().catch(() => {});
-        this.state.client = null;
-      }
-      if (this.server) {
-        this.server.close((err) => {
-          if (err) reject(err);
-          else resolve();
-        });
-      } else {
-        resolve();
-      }
-    });
+  async stop(): Promise<void> {
+    if (this.state.client) {
+      await this.state.client.stop().catch(() => {});
+      this.state.client = null;
+      this.state.language = null;
+    }
+    await this.app.close();
   }
 }

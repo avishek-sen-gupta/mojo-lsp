@@ -14,12 +14,12 @@
   "license": "MIT",
   "type": "commonjs",
   "dependencies": {
-    "express": "^4.21.2",
+    "@fastify/cors": "^10.0.2",
+    "fastify": "^5.2.1",
     "vscode-jsonrpc": "^8.2.1",
     "vscode-languageserver-protocol": "^3.17.5"
   },
   "devDependencies": {
-    "@types/express": "^5.0.0",
     "@types/node": "^25.0.10",
     "typescript": "^5.9.3"
   }

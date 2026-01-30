@@ -9,3 +9,5 @@ fileignoreconfig:
   checksum: ff9e7d84672c9e932dd0c556c0dfb869679761eed6794f47ec88efc2c0159565
 - filename: src/lsp-server/sql-lsp-server.ts
   checksum: 9d9544aab7c058e5cbbec04a76f59c50d8e3f6d133fd3013fad8780d36b8c22c
+- filename: package-lock.json
+  checksum: 4a04220a61de2e992ef4a4aff499abe7d320997b95aa7ba796e027430aadb774
