@@ -7,7 +7,7 @@ import cors from '@fastify/cors';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { LSPClient } from '../lsp-client';
-import { schemas } from './schemas';
+import { schemaDefinitions } from './schemas';
 import {
   StartBody,
   DocumentOpenBody,
@@ -647,8 +647,8 @@ export class LSPBridgeServer {
     });
 
     // Add schemas from generated definitions
-    for (const [name, schema] of Object.entries(schemas)) {
-      app.addSchema({ $id: name, ...schema });
+    for (const [name, schema] of Object.entries(schemaDefinitions)) {
+      app.addSchema({ $id: name, ...(schema as object) });
     }
 
     // Register CORS
