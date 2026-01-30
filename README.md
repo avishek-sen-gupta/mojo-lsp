@@ -476,9 +476,18 @@ npm run generate:schemas
 # Build (includes schema generation)
 npm run build
 
+# Run tests
+npm test
+
 # Clean
 npm run clean
 ```
+
+### Testing
+
+Tests are located in `src/tests/` and use Vitest. Each supported language has its own test file that verifies LSP functionality against real language servers.
+
+Tests run sequentially (not in parallel) to avoid resource contention between multiple LSP server processes.
 
 ### Schema Generation
 
