@@ -373,6 +373,8 @@ The bridge server supports starting LSP servers for multiple languages:
 | SQL | `language`, `rootUri`, `serverPath` |
 | COBOL | `language`, `rootUri`, `serverJar` |
 
+> **Note:** The actual LSP servers must be installed separately. This library only provides the client and bridge infrastructure. See the [Supported Languages](#supported-languages) section for installation instructions for each language server.
+
 ### Bridge API Endpoints
 
 #### Lifecycle
