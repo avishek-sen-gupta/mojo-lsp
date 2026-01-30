@@ -29,7 +29,6 @@ import {
   ReferencesResponse,
   SymbolsResponse,
   DiagnosticsResponse,
-  SupportedLanguage,
   TypescriptStartBody,
   PythonStartBody,
   JavaStartBody,
@@ -66,9 +65,6 @@ function createLspClientForLanguage(body: StartBody): LSPClient {
     }
     case 'python': {
       const opts = body as PythonStartBody;
-      if (!opts.serverDir) {
-        throw new BadRequestError('serverDir is required for Python');
-      }
       return createPythonLspClient({
         rootUri: opts.rootUri,
         serverDir: opts.serverDir,
@@ -99,9 +95,6 @@ function createLspClientForLanguage(body: StartBody): LSPClient {
     }
     case 'perl': {
       const opts = body as PerlStartBody;
-      if (!opts.serverPath) {
-        throw new BadRequestError('serverPath is required for Perl');
-      }
       return createPerlLspClient({
         rootUri: opts.rootUri,
         serverPath: opts.serverPath,
@@ -117,9 +110,6 @@ function createLspClientForLanguage(body: StartBody): LSPClient {
     }
     case 'csharp': {
       const opts = body as CsharpStartBody;
-      if (!opts.solutionPath) {
-        throw new BadRequestError('solutionPath is required for C#');
-      }
       return createCsharpLspClient({
         rootUri: opts.rootUri,
         solutionPath: opts.solutionPath,
@@ -129,9 +119,6 @@ function createLspClientForLanguage(body: StartBody): LSPClient {
     }
     case 'sql': {
       const opts = body as SqlStartBody;
-      if (!opts.serverPath) {
-        throw new BadRequestError('serverPath is required for SQL');
-      }
       return createSqlLspClient({
         rootUri: opts.rootUri,
         serverPath: opts.serverPath,
@@ -140,9 +127,6 @@ function createLspClientForLanguage(body: StartBody): LSPClient {
     }
     case 'cobol': {
       const opts = body as CobolStartBody;
-      if (!opts.serverJar) {
-        throw new BadRequestError('serverJar is required for COBOL');
-      }
       return createCobolLspClient({
         rootUri: opts.rootUri,
         serverJar: opts.serverJar,
@@ -239,25 +223,6 @@ function registerLifecycleRoutes(app: FastifyInstance, state: BridgeState): void
 
     const body = request.body;
 
-    if (!body.language) {
-      reply.code(400);
-      return { error: 'language is required' };
-    }
-    if (!body.rootUri) {
-      reply.code(400);
-      return { error: 'rootUri is required' };
-    }
-
-    // Validate language
-    const supportedLanguages: SupportedLanguage[] = [
-      'typescript', 'python', 'java', 'rust', 'ruby',
-      'perl', 'cpp', 'csharp', 'sql', 'cobol',
-    ];
-    if (!supportedLanguages.includes(body.language)) {
-      reply.code(400);
-      return { error: `Unsupported language: ${body.language}. Supported: ${supportedLanguages.join(', ')}` };
-    }
-
     try {
       state.client = createLspClientForLanguage(body);
       state.language = body.language;
@@ -342,22 +307,8 @@ function registerDocumentRoutes(app: FastifyInstance, state: BridgeState): void 
         400: { $ref: 'ErrorResponse#' },
       },
     },
-  }, async (request, reply) => {
+  }, async (request) => {
     const { uri, languageId, text } = request.body;
-
-    if (!uri) {
-      reply.code(400);
-      return { error: 'uri is required' };
-    }
-    if (!languageId) {
-      reply.code(400);
-      return { error: 'languageId is required' };
-    }
-    if (text === undefined) {
-      reply.code(400);
-      return { error: 'text is required' };
-    }
-
     await state.client!.openDocument(uri, languageId, text);
     return { success: true };
   });
@@ -373,18 +324,8 @@ function registerDocumentRoutes(app: FastifyInstance, state: BridgeState): void 
         400: { $ref: 'ErrorResponse#' },
       },
     },
-  }, async (request, reply) => {
+  }, async (request) => {
     const { uri, text } = request.body;
-
-    if (!uri) {
-      reply.code(400);
-      return { error: 'uri is required' };
-    }
-    if (text === undefined) {
-      reply.code(400);
-      return { error: 'text is required' };
-    }
-
     await state.client!.changeDocument(uri, text);
     return { success: true };
   });
@@ -400,14 +341,8 @@ function registerDocumentRoutes(app: FastifyInstance, state: BridgeState): void 
         400: { $ref: 'ErrorResponse#' },
       },
     },
-  }, async (request, reply) => {
+  }, async (request) => {
     const { uri } = request.body;
-
-    if (!uri) {
-      reply.code(400);
-      return { error: 'uri is required' };
-    }
-
     await state.client!.closeDocument(uri);
     return { success: true };
   });
@@ -434,22 +369,8 @@ function registerFeatureRoutes(app: FastifyInstance, state: BridgeState): void {
         400: { $ref: 'ErrorResponse#' },
       },
     },
-  }, async (request, reply) => {
+  }, async (request) => {
     const { uri, line, character } = request.body;
-
-    if (!uri) {
-      reply.code(400);
-      return { error: 'uri is required' };
-    }
-    if (line === undefined) {
-      reply.code(400);
-      return { error: 'line is required' };
-    }
-    if (character === undefined) {
-      reply.code(400);
-      return { error: 'character is required' };
-    }
-
     const result = await state.client!.getCompletion(uri, line, character);
     return { items: result };
   });
@@ -465,22 +386,8 @@ function registerFeatureRoutes(app: FastifyInstance, state: BridgeState): void {
         400: { $ref: 'ErrorResponse#' },
       },
     },
-  }, async (request, reply) => {
+  }, async (request) => {
     const { uri, line, character } = request.body;
-
-    if (!uri) {
-      reply.code(400);
-      return { error: 'uri is required' };
-    }
-    if (line === undefined) {
-      reply.code(400);
-      return { error: 'line is required' };
-    }
-    if (character === undefined) {
-      reply.code(400);
-      return { error: 'character is required' };
-    }
-
     const result = await state.client!.getHover(uri, line, character);
     return { hover: result };
   });
@@ -496,22 +403,8 @@ function registerFeatureRoutes(app: FastifyInstance, state: BridgeState): void {
         400: { $ref: 'ErrorResponse#' },
       },
     },
-  }, async (request, reply) => {
+  }, async (request) => {
     const { uri, line, character } = request.body;
-
-    if (!uri) {
-      reply.code(400);
-      return { error: 'uri is required' };
-    }
-    if (line === undefined) {
-      reply.code(400);
-      return { error: 'line is required' };
-    }
-    if (character === undefined) {
-      reply.code(400);
-      return { error: 'character is required' };
-    }
-
     const result = await state.client!.getDefinition(uri, line, character);
     return { locations: result };
   });
@@ -527,22 +420,8 @@ function registerFeatureRoutes(app: FastifyInstance, state: BridgeState): void {
         400: { $ref: 'ErrorResponse#' },
       },
     },
-  }, async (request, reply) => {
+  }, async (request) => {
     const { uri, line, character, includeDeclaration = true } = request.body;
-
-    if (!uri) {
-      reply.code(400);
-      return { error: 'uri is required' };
-    }
-    if (line === undefined) {
-      reply.code(400);
-      return { error: 'line is required' };
-    }
-    if (character === undefined) {
-      reply.code(400);
-      return { error: 'character is required' };
-    }
-
     const result = await state.client!.getReferences(uri, line, character, includeDeclaration);
     return { locations: result };
   });
@@ -558,14 +437,8 @@ function registerFeatureRoutes(app: FastifyInstance, state: BridgeState): void {
         400: { $ref: 'ErrorResponse#' },
       },
     },
-  }, async (request, reply) => {
+  }, async (request) => {
     const { uri } = request.body;
-
-    if (!uri) {
-      reply.code(400);
-      return { error: 'uri is required' };
-    }
-
     const result = await state.client!.getDocumentSymbols(uri);
     return { symbols: result };
   });
