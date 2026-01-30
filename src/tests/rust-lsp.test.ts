@@ -34,7 +34,7 @@ describe('Rust LSP', () => {
     fileUri = `file://${targetFile}`;
 
     await client.openDocument(fileUri, 'rust', fileContent);
-    await wait(3000);
+    await wait(8000);
   });
 
   afterAll(async () => {
