@@ -80,6 +80,7 @@ Factory modules provide pre-configured LSP clients for each language:
 | Clojure | `createClojureLspClient()` | `lsp-server/clojure-lsp-server` |
 | C# | `createCsharpLspClient()` | `lsp-server/csharp-lsp-server` |
 | COBOL | `createCobolLspClient()` | `lsp-server/cobol-lsp-server` |
+| Go | `createGoLspClient()` | `lsp-server/go-lsp-server` |
 | Java | `createJavaLspClient()` | `lsp-server/java-lsp-server` |
 | Kotlin | `createKotlinLspClient()` | `lsp-server/kotlin-lsp-server` |
 | Perl | `createPerlLspClient()` | `lsp-server/perl-lsp-server` |
@@ -153,6 +154,7 @@ The following LSP servers have been tested with this client:
 | Clojure | clojure-lsp | https://github.com/clojure-lsp/clojure-lsp |
 | C# | csharp-ls | https://github.com/razzmatazz/csharp-language-server |
 | COBOL | Che4z COBOL Language Server | https://github.com/eclipse-che4z/che-che4z-lsp-for-cobol |
+| Go | gopls | https://github.com/golang/tools/tree/master/gopls |
 | Java | Eclipse JDT Language Server | https://github.com/eclipse-jdtls/eclipse.jdt.ls |
 | Kotlin | kotlin-language-server | https://github.com/fwcd/kotlin-language-server |
 | Perl | PerlNavigator | https://github.com/bscan/PerlNavigator |
@@ -264,6 +266,16 @@ brew install clojure-lsp/brew/clojure-lsp-native
 
 # Run the example
 node dist/examples/clojure-example.js
+```
+
+### Go Example
+
+```bash
+# Install gopls
+go install golang.org/x/tools/gopls@latest
+
+# Run the example
+node dist/examples/go-example.js
 ```
 
 ### C++ Example
@@ -389,6 +401,7 @@ The bridge server supports starting LSP servers for multiple languages:
 | Clojure | `language`, `rootUri` |
 | C# | `language`, `rootUri`, `solutionPath` |
 | COBOL | `language`, `rootUri`, `serverJar` |
+| Go | `language`, `rootUri` |
 | Java | `language`, `rootUri` |
 | Kotlin | `language`, `rootUri` |
 | Perl | `language`, `rootUri`, `serverPath` |

@@ -26,7 +26,8 @@ export type SupportedLanguage =
   | 'bash'
   | 'terraform'
   | 'clojure'
-  | 'kotlin';
+  | 'kotlin'
+  | 'go';
 
 // Base start body with common fields
 interface StartBodyBase {
@@ -113,6 +114,12 @@ export interface KotlinStartBody extends StartBodyBase {
   language: 'kotlin';
 }
 
+export interface GoStartBody extends StartBodyBase {
+  language: 'go';
+  /** Path to gopls executable (default: ~/go/bin/gopls) */
+  serverPath?: string;
+}
+
 // Union type for all start body variants
 export type StartBody =
   | TypescriptStartBody
@@ -128,7 +135,8 @@ export type StartBody =
   | BashStartBody
   | TerraformStartBody
   | ClojureStartBody
-  | KotlinStartBody;
+  | KotlinStartBody
+  | GoStartBody;
 
 // Document body types
 export interface DocumentOpenBody {

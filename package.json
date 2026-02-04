@@ -23,7 +23,8 @@
     "test:cobol": "vitest run cobol-lsp",
     "test:terraform": "vitest run terraform-lsp",
     "test:clojure": "vitest run clojure-lsp",
-    "test:kotlin": "vitest run kotlin-lsp"
+    "test:kotlin": "vitest run kotlin-lsp",
+    "test:go": "vitest run go-lsp"
   },
   "keywords": [
     "lsp",
