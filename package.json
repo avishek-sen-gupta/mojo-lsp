@@ -11,6 +11,7 @@
     "clean": "rm -rf dist src/bridge/schemas",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:bash": "vitest run bash-lsp",
     "test:typescript": "vitest run typescript-lsp",
     "test:rust": "vitest run rust-lsp",
     "test:cpp": "vitest run cpp-lsp",

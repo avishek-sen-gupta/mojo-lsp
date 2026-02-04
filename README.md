@@ -75,16 +75,17 @@ Factory modules provide pre-configured LSP clients for each language:
 
 | Language | Factory Function | Module |
 |----------|-----------------|--------|
-| TypeScript | `createTypescriptLspClient()` | `lsp-server/typescript-lsp-server` |
-| Python | `createPythonLspClient()` | `lsp-server/python-lsp-server` |
-| Java | `createJavaLspClient()` | `lsp-server/java-lsp-server` |
-| Ruby | `createRubyLspClient()` | `lsp-server/ruby-lsp-server` |
-| Perl | `createPerlLspClient()` | `lsp-server/perl-lsp-server` |
-| Rust | `createRustLspClient()` | `lsp-server/rust-lsp-server` |
+| Bash | `createBashLspClient()` | `lsp-server/bash-lsp-server` |
 | C/C++ | `createCppLspClient()` | `lsp-server/cpp-lsp-server` |
 | C# | `createCsharpLspClient()` | `lsp-server/csharp-lsp-server` |
 | COBOL | `createCobolLspClient()` | `lsp-server/cobol-lsp-server` |
+| Java | `createJavaLspClient()` | `lsp-server/java-lsp-server` |
+| Perl | `createPerlLspClient()` | `lsp-server/perl-lsp-server` |
+| Python | `createPythonLspClient()` | `lsp-server/python-lsp-server` |
+| Ruby | `createRubyLspClient()` | `lsp-server/ruby-lsp-server` |
+| Rust | `createRustLspClient()` | `lsp-server/rust-lsp-server` |
 | SQL | `createSqlLspClient()` | `lsp-server/sql-lsp-server` |
+| TypeScript | `createTypescriptLspClient()` | `lsp-server/typescript-lsp-server` |
 
 Each module also exports a `find*Files()` helper function to discover source files.
 
@@ -144,6 +145,7 @@ The following LSP servers have been tested with this client:
 
 | Language | LSP Server | Project |
 |----------|------------|---------|
+| Bash | bash-language-server | https://github.com/bash-lsp/bash-language-server |
 | C/C++ | clangd | https://clangd.llvm.org/ |
 | C# | csharp-ls | https://github.com/razzmatazz/csharp-language-server |
 | COBOL | Che4z COBOL Language Server | https://github.com/eclipse-che4z/che-che4z-lsp-for-cobol |
@@ -162,6 +164,16 @@ All examples are located in `src/examples/`. Build the project first:
 ```bash
 npm install
 npm run build
+```
+
+### Bash Example
+
+```bash
+# Install Bash language server
+npm install -g bash-language-server
+
+# Run the example
+node dist/examples/bash-example.js
 ```
 
 ### TypeScript Example
@@ -336,16 +348,17 @@ The bridge server supports starting LSP servers for multiple languages:
 
 | Language | Required Fields |
 |----------|-----------------|
-| TypeScript | `language`, `rootUri` |
-| Python | `language`, `rootUri`, `serverDir` |
-| Java | `language`, `rootUri` |
-| Rust | `language`, `rootUri` |
-| Ruby | `language`, `rootUri` |
-| Perl | `language`, `rootUri`, `serverPath` |
+| Bash | `language`, `rootUri` |
 | C/C++ | `language`, `rootUri` |
 | C# | `language`, `rootUri`, `solutionPath` |
-| SQL | `language`, `rootUri`, `serverPath` |
 | COBOL | `language`, `rootUri`, `serverJar` |
+| Java | `language`, `rootUri` |
+| Perl | `language`, `rootUri`, `serverPath` |
+| Python | `language`, `rootUri`, `serverDir` |
+| Ruby | `language`, `rootUri` |
+| Rust | `language`, `rootUri` |
+| SQL | `language`, `rootUri`, `serverPath` |
+| TypeScript | `language`, `rootUri` |
 
 > **Note:** The actual LSP servers must be installed separately. This library only provides the client and bridge infrastructure. See the [Supported Languages](#supported-languages) section for installation instructions for each language server.
 

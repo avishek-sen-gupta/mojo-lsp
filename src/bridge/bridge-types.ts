@@ -22,7 +22,8 @@ export type SupportedLanguage =
   | 'cpp'
   | 'csharp'
   | 'sql'
-  | 'cobol';
+  | 'cobol'
+  | 'bash';
 
 // Base start body with common fields
 interface StartBodyBase {
@@ -93,6 +94,10 @@ export interface CobolStartBody extends StartBodyBase {
   host?: string;
 }
 
+export interface BashStartBody extends StartBodyBase {
+  language: 'bash';
+}
+
 // Union type for all start body variants
 export type StartBody =
   | TypescriptStartBody
@@ -104,7 +109,8 @@ export type StartBody =
   | CppStartBody
   | CsharpStartBody
   | SqlStartBody
-  | CobolStartBody;
+  | CobolStartBody
+  | BashStartBody;
 
 // Document body types
 export interface DocumentOpenBody {
