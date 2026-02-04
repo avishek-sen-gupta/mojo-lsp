@@ -147,23 +147,23 @@ const pythonFiles = findPythonFiles('/path/to/python/project');
 
 The following LSP servers have been tested with this client:
 
-| Language | LSP Server | Project |
-|----------|------------|---------|
-| Bash | bash-language-server | https://github.com/bash-lsp/bash-language-server |
-| C/C++ | clangd | https://clangd.llvm.org/ |
-| Clojure | clojure-lsp | https://github.com/clojure-lsp/clojure-lsp |
-| C# | csharp-ls | https://github.com/razzmatazz/csharp-language-server |
-| COBOL | Che4z COBOL Language Server | https://github.com/eclipse-che4z/che-che4z-lsp-for-cobol |
-| Go | gopls | https://github.com/golang/tools/tree/master/gopls |
-| Java | Eclipse JDT Language Server | https://github.com/eclipse-jdtls/eclipse.jdt.ls |
-| Kotlin | kotlin-language-server | https://github.com/fwcd/kotlin-language-server |
-| Perl | PerlNavigator | https://github.com/bscan/PerlNavigator |
-| Python | pylsp | https://github.com/python-lsp/python-lsp-server |
-| Ruby | Solargraph | https://solargraph.org/ |
-| Rust | rust-analyzer | https://rust-analyzer.github.io/ |
-| SQL | sql-language-server | https://github.com/joe-re/sql-language-server |
-| Terraform | terraform-ls | https://github.com/hashicorp/terraform-ls |
-| TypeScript | typescript-language-server | https://github.com/typescript-language-server/typescript-language-server |
+| Language | LSP Server | Project | Notes |
+|----------|------------|---------|-------|
+| Bash | bash-language-server | https://github.com/bash-lsp/bash-language-server | |
+| C/C++ | clangd | https://clangd.llvm.org/ | |
+| Clojure | clojure-lsp | https://github.com/clojure-lsp/clojure-lsp | |
+| C# | csharp-ls | https://github.com/razzmatazz/csharp-language-server | |
+| COBOL | Che4z COBOL Language Server | https://github.com/eclipse-che4z/che-che4z-lsp-for-cobol | |
+| Go | gopls | https://github.com/golang/tools/tree/master/gopls | |
+| Java | Eclipse JDT Language Server | https://github.com/eclipse-jdtls/eclipse.jdt.ls | |
+| Kotlin | kotlin-language-server | https://github.com/fwcd/kotlin-language-server | |
+| Perl | PerlNavigator | https://github.com/bscan/PerlNavigator | |
+| Python | pylsp | https://github.com/python-lsp/python-lsp-server | |
+| Ruby | Solargraph | https://solargraph.org/ | |
+| Rust | rust-analyzer | https://rust-analyzer.github.io/ | |
+| SQL | sql-language-server | https://github.com/joe-re/sql-language-server | ⚠️ Not working yet |
+| Terraform | terraform-ls | https://github.com/hashicorp/terraform-ls | |
+| TypeScript | typescript-language-server | https://github.com/typescript-language-server/typescript-language-server | |
 
 ## Running the Examples
 
