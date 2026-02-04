@@ -15,6 +15,7 @@ import {
   BashStartBody,
   TerraformStartBody,
   ClojureStartBody,
+  KotlinStartBody,
 } from './bridge-types';
 
 import { createTypescriptLspClient } from '../lsp-server/typescript-lsp-server';
@@ -30,6 +31,7 @@ import { createCobolLspClient } from '../lsp-server/cobol-lsp-server';
 import { createBashLspClient } from '../lsp-server/bash-lsp-server';
 import { createTerraformLspClient } from '../lsp-server/terraform-lsp-server';
 import { createClojureLspClient } from '../lsp-server/clojure-lsp-server';
+import { createKotlinLspClient } from '../lsp-server/kotlin-lsp-server';
 
 export function createLspClientForLanguage(body: StartBody): LSPClient {
   switch (body.language) {
@@ -128,6 +130,13 @@ export function createLspClientForLanguage(body: StartBody): LSPClient {
     case 'clojure': {
       const opts = body as ClojureStartBody;
       return createClojureLspClient({
+        rootUri: opts.rootUri,
+        serverArgs: opts.serverArgs,
+      });
+    }
+    case 'kotlin': {
+      const opts = body as KotlinStartBody;
+      return createKotlinLspClient({
         rootUri: opts.rootUri,
         serverArgs: opts.serverArgs,
       });

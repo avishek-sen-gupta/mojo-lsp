@@ -25,7 +25,8 @@ export type SupportedLanguage =
   | 'cobol'
   | 'bash'
   | 'terraform'
-  | 'clojure';
+  | 'clojure'
+  | 'kotlin';
 
 // Base start body with common fields
 interface StartBodyBase {
@@ -108,6 +109,10 @@ export interface ClojureStartBody extends StartBodyBase {
   language: 'clojure';
 }
 
+export interface KotlinStartBody extends StartBodyBase {
+  language: 'kotlin';
+}
+
 // Union type for all start body variants
 export type StartBody =
   | TypescriptStartBody
@@ -122,7 +127,8 @@ export type StartBody =
   | CobolStartBody
   | BashStartBody
   | TerraformStartBody
-  | ClojureStartBody;
+  | ClojureStartBody
+  | KotlinStartBody;
 
 // Document body types
 export interface DocumentOpenBody {

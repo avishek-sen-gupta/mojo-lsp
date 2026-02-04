@@ -81,6 +81,7 @@ Factory modules provide pre-configured LSP clients for each language:
 | C# | `createCsharpLspClient()` | `lsp-server/csharp-lsp-server` |
 | COBOL | `createCobolLspClient()` | `lsp-server/cobol-lsp-server` |
 | Java | `createJavaLspClient()` | `lsp-server/java-lsp-server` |
+| Kotlin | `createKotlinLspClient()` | `lsp-server/kotlin-lsp-server` |
 | Perl | `createPerlLspClient()` | `lsp-server/perl-lsp-server` |
 | Python | `createPythonLspClient()` | `lsp-server/python-lsp-server` |
 | Ruby | `createRubyLspClient()` | `lsp-server/ruby-lsp-server` |
@@ -153,6 +154,7 @@ The following LSP servers have been tested with this client:
 | C# | csharp-ls | https://github.com/razzmatazz/csharp-language-server |
 | COBOL | Che4z COBOL Language Server | https://github.com/eclipse-che4z/che-che4z-lsp-for-cobol |
 | Java | Eclipse JDT Language Server | https://github.com/eclipse-jdtls/eclipse.jdt.ls |
+| Kotlin | kotlin-language-server | https://github.com/fwcd/kotlin-language-server |
 | Perl | PerlNavigator | https://github.com/bscan/PerlNavigator |
 | Python | pylsp | https://github.com/python-lsp/python-lsp-server |
 | Ruby | Solargraph | https://solargraph.org/ |
@@ -219,6 +221,16 @@ brew install jdtls
 
 # Run the example
 node dist/examples/java-example.js
+```
+
+### Kotlin Example
+
+```bash
+# Install Kotlin language server (macOS)
+brew install kotlin-lsp
+
+# Run the example
+node dist/examples/kotlin-example.js
 ```
 
 ### Ruby Example
@@ -378,6 +390,7 @@ The bridge server supports starting LSP servers for multiple languages:
 | C# | `language`, `rootUri`, `solutionPath` |
 | COBOL | `language`, `rootUri`, `serverJar` |
 | Java | `language`, `rootUri` |
+| Kotlin | `language`, `rootUri` |
 | Perl | `language`, `rootUri`, `serverPath` |
 | Python | `language`, `rootUri`, `serverDir` |
 | Ruby | `language`, `rootUri` |
