@@ -4,42 +4,16 @@ A generic Language Server Protocol (LSP) client library for Node.js built on top
 
 > **Note:** This project was vibe-coded.
 
+## Requirements
+
+- **Node.js** >= 22.0.0
+- **npm** >= 8.0.0 (comes with Node.js)
+- **Language servers** - Each language requires its own LSP server to be installed separately. See [Supported Languages](#supported-languages) for installation instructions.
+
 ## Installation
 
 ```bash
 npm install mojo-lsp
-```
-
-## Project Structure
-
-```
-src/
-├── lsp-client.ts          # Core LSP client implementation
-├── index.ts               # Main exports
-├── lsp-server/            # Language-specific LSP server factory modules
-│   ├── typescript-lsp-server.ts
-│   ├── python-lsp-server.ts
-│   ├── java-lsp-server.ts
-│   ├── ruby-lsp-server.ts
-│   ├── perl-lsp-server.ts
-│   ├── rust-lsp-server.ts
-│   ├── cpp-lsp-server.ts
-│   ├── csharp-lsp-server.ts
-│   ├── cobol-lsp-server.ts
-│   └── sql-lsp-server.ts
-├── bridge/                # REST API bridge for LSP servers (Fastify)
-│   ├── bridge-server.ts   # Main server with OpenAPI docs
-│   ├── bridge-cli.ts      # CLI entry point
-│   ├── bridge-types.ts    # TypeScript type definitions
-│   └── schemas/           # Auto-generated JSON schemas
-└── examples/              # Example usage for each language
-    ├── example-typescript.ts
-    ├── python-example.ts
-    ├── java-example.ts
-    ├── ruby-example.ts
-    └── ...
-scripts/
-└── generate-schemas.ts    # Generates JSON schemas from TypeScript types
 ```
 
 ## Usage
