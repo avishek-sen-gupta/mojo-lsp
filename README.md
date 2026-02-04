@@ -4,9 +4,15 @@ A generic Language Server Protocol (LSP) client library for Node.js built on top
 
 > **Note:** This project was vibe-coded.
 
+## Why did I write this?
+
+- I wanted to write a small, but non-trivial project, to try out how effective vibe coding was.
+- There are other clients with much more extensive support for different LSP servers; however, they are very specialised to the IDEs of which they are a part of, e.g., VS Code, Neovim, etc. The aim of this library is to allow LSP server access without any lock-in with a specific editor. More specifically, this is intended for use in experiments in AI inference on legacy codebases.
+- I wanted to write an LSP client to be able to connect to LSP servers using multiple transport formats (stdio, sockets, etc.). There are some libraries like [MultiLSPy](https://github.com/microsoft/multilspy) which do this, but they don't support the `stdio` protocol, which make it harder to interface with LSP servers which use sockets (like the COBOL LSP server).
+
 ## Features
 
-- **Multi-language support** - Pre-configured factory modules for 15 languages: Bash, C/C++, Clojure, C#, COBOL, Go, Java, Kotlin, Perl, Python, Ruby, Rust, SQL, Terraform, and TypeScript
+- **Multi-language support** - Pre-configured factory modules for ~15 languages, and counting
 - **Simple API** - Easy-to-use client with methods for completions, hover, go-to-definition, find references, and document symbols
 - **REST Bridge Server** - HTTP API that exposes LSP functionality over REST with OpenAPI documentation
 - **Flexible connections** - Supports both stdio and socket-based LSP server connections
