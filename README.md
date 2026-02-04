@@ -4,6 +4,14 @@ A generic Language Server Protocol (LSP) client library for Node.js built on top
 
 > **Note:** This project was vibe-coded.
 
+## Features
+
+- **Multi-language support** - Pre-configured factory modules for 15 languages: Bash, C/C++, Clojure, C#, COBOL, Go, Java, Kotlin, Perl, Python, Ruby, Rust, SQL, Terraform, and TypeScript
+- **Simple API** - Easy-to-use client with methods for completions, hover, go-to-definition, find references, and document symbols
+- **REST Bridge Server** - HTTP API that exposes LSP functionality over REST with OpenAPI documentation
+- **Flexible connections** - Supports both stdio and socket-based LSP server connections
+- **TypeScript-first** - Written in TypeScript with full type definitions
+
 ## Requirements
 
 - **Node.js** >= 22.0.0
