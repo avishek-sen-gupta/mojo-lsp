@@ -14,6 +14,7 @@ import {
   CobolStartBody,
   BashStartBody,
   TerraformStartBody,
+  ClojureStartBody,
 } from './bridge-types';
 
 import { createTypescriptLspClient } from '../lsp-server/typescript-lsp-server';
@@ -28,6 +29,7 @@ import { createSqlLspClient } from '../lsp-server/sql-lsp-server';
 import { createCobolLspClient } from '../lsp-server/cobol-lsp-server';
 import { createBashLspClient } from '../lsp-server/bash-lsp-server';
 import { createTerraformLspClient } from '../lsp-server/terraform-lsp-server';
+import { createClojureLspClient } from '../lsp-server/clojure-lsp-server';
 
 export function createLspClientForLanguage(body: StartBody): LSPClient {
   switch (body.language) {
@@ -119,6 +121,13 @@ export function createLspClientForLanguage(body: StartBody): LSPClient {
     case 'terraform': {
       const opts = body as TerraformStartBody;
       return createTerraformLspClient({
+        rootUri: opts.rootUri,
+        serverArgs: opts.serverArgs,
+      });
+    }
+    case 'clojure': {
+      const opts = body as ClojureStartBody;
+      return createClojureLspClient({
         rootUri: opts.rootUri,
         serverArgs: opts.serverArgs,
       });

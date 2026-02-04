@@ -24,7 +24,8 @@ export type SupportedLanguage =
   | 'sql'
   | 'cobol'
   | 'bash'
-  | 'terraform';
+  | 'terraform'
+  | 'clojure';
 
 // Base start body with common fields
 interface StartBodyBase {
@@ -103,6 +104,10 @@ export interface TerraformStartBody extends StartBodyBase {
   language: 'terraform';
 }
 
+export interface ClojureStartBody extends StartBodyBase {
+  language: 'clojure';
+}
+
 // Union type for all start body variants
 export type StartBody =
   | TypescriptStartBody
@@ -116,7 +121,8 @@ export type StartBody =
   | SqlStartBody
   | CobolStartBody
   | BashStartBody
-  | TerraformStartBody;
+  | TerraformStartBody
+  | ClojureStartBody;
 
 // Document body types
 export interface DocumentOpenBody {

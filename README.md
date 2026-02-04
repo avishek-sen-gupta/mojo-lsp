@@ -77,6 +77,7 @@ Factory modules provide pre-configured LSP clients for each language:
 |----------|-----------------|--------|
 | Bash | `createBashLspClient()` | `lsp-server/bash-lsp-server` |
 | C/C++ | `createCppLspClient()` | `lsp-server/cpp-lsp-server` |
+| Clojure | `createClojureLspClient()` | `lsp-server/clojure-lsp-server` |
 | C# | `createCsharpLspClient()` | `lsp-server/csharp-lsp-server` |
 | COBOL | `createCobolLspClient()` | `lsp-server/cobol-lsp-server` |
 | Java | `createJavaLspClient()` | `lsp-server/java-lsp-server` |
@@ -148,6 +149,7 @@ The following LSP servers have been tested with this client:
 |----------|------------|---------|
 | Bash | bash-language-server | https://github.com/bash-lsp/bash-language-server |
 | C/C++ | clangd | https://clangd.llvm.org/ |
+| Clojure | clojure-lsp | https://github.com/clojure-lsp/clojure-lsp |
 | C# | csharp-ls | https://github.com/razzmatazz/csharp-language-server |
 | COBOL | Che4z COBOL Language Server | https://github.com/eclipse-che4z/che-che4z-lsp-for-cobol |
 | Java | Eclipse JDT Language Server | https://github.com/eclipse-jdtls/eclipse.jdt.ls |
@@ -240,6 +242,16 @@ rustup component add rust-analyzer
 
 # Run the example
 node dist/examples/rust-example.js
+```
+
+### Clojure Example
+
+```bash
+# Install Clojure LSP (macOS)
+brew install clojure-lsp/brew/clojure-lsp-native
+
+# Run the example
+node dist/examples/clojure-example.js
 ```
 
 ### C++ Example
@@ -362,6 +374,7 @@ The bridge server supports starting LSP servers for multiple languages:
 |----------|-----------------|
 | Bash | `language`, `rootUri` |
 | C/C++ | `language`, `rootUri` |
+| Clojure | `language`, `rootUri` |
 | C# | `language`, `rootUri`, `solutionPath` |
 | COBOL | `language`, `rootUri`, `serverJar` |
 | Java | `language`, `rootUri` |
