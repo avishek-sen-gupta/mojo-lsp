@@ -20,7 +20,8 @@
     "test:ruby": "vitest run ruby-lsp",
     "test:csharp": "vitest run csharp-lsp",
     "test:sql": "vitest run sql-lsp",
-    "test:cobol": "vitest run cobol-lsp"
+    "test:cobol": "vitest run cobol-lsp",
+    "test:terraform": "vitest run terraform-lsp"
   },
   "keywords": [
     "lsp",

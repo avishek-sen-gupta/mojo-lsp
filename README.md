@@ -85,6 +85,7 @@ Factory modules provide pre-configured LSP clients for each language:
 | Ruby | `createRubyLspClient()` | `lsp-server/ruby-lsp-server` |
 | Rust | `createRustLspClient()` | `lsp-server/rust-lsp-server` |
 | SQL | `createSqlLspClient()` | `lsp-server/sql-lsp-server` |
+| Terraform | `createTerraformLspClient()` | `lsp-server/terraform-lsp-server` |
 | TypeScript | `createTypescriptLspClient()` | `lsp-server/typescript-lsp-server` |
 
 Each module also exports a `find*Files()` helper function to discover source files.
@@ -155,6 +156,7 @@ The following LSP servers have been tested with this client:
 | Ruby | Solargraph | https://solargraph.org/ |
 | Rust | rust-analyzer | https://rust-analyzer.github.io/ |
 | SQL | sql-language-server | https://github.com/joe-re/sql-language-server |
+| Terraform | terraform-ls | https://github.com/hashicorp/terraform-ls |
 | TypeScript | typescript-language-server | https://github.com/typescript-language-server/typescript-language-server |
 
 ## Running the Examples
@@ -174,6 +176,16 @@ npm install -g bash-language-server
 
 # Run the example
 node dist/examples/bash-example.js
+```
+
+### Terraform Example
+
+```bash
+# Install Terraform language server (macOS)
+brew install hashicorp/tap/terraform-ls
+
+# Run the example
+node dist/examples/terraform-example.js
 ```
 
 ### TypeScript Example
@@ -358,6 +370,7 @@ The bridge server supports starting LSP servers for multiple languages:
 | Ruby | `language`, `rootUri` |
 | Rust | `language`, `rootUri` |
 | SQL | `language`, `rootUri`, `serverPath` |
+| Terraform | `language`, `rootUri` |
 | TypeScript | `language`, `rootUri` |
 
 > **Note:** The actual LSP servers must be installed separately. This library only provides the client and bridge infrastructure. See the [Supported Languages](#supported-languages) section for installation instructions for each language server.
