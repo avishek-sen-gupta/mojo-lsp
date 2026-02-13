@@ -98,6 +98,7 @@ Factory modules provide pre-configured LSP clients for each language:
 | Java | `createJavaLspClient()` | `lsp-server/java-lsp-server` |
 | Kotlin | `createKotlinLspClient()` | `lsp-server/kotlin-lsp-server` |
 | Perl | `createPerlLspClient()` | `lsp-server/perl-lsp-server` |
+| PHP | `createPhpLspClient()` | `lsp-server/php-lsp-server` |
 | Python | `createPythonLspClient()` | `lsp-server/python-lsp-server` |
 | Ruby | `createRubyLspClient()` | `lsp-server/ruby-lsp-server` |
 | Rust | `createRustLspClient()` | `lsp-server/rust-lsp-server` |
@@ -172,6 +173,7 @@ The following LSP servers have been tested with this client:
 | Java | Eclipse JDT Language Server | https://github.com/eclipse-jdtls/eclipse.jdt.ls | |
 | Kotlin | kotlin-language-server | https://github.com/fwcd/kotlin-language-server | |
 | Perl | PerlNavigator | https://github.com/bscan/PerlNavigator | |
+| PHP | Intelephense | https://intelephense.com/ | |
 | Python | pylsp | https://github.com/python-lsp/python-lsp-server | |
 | Ruby | Solargraph | https://solargraph.org/ | |
 | Rust | rust-analyzer | https://rust-analyzer.github.io/ | |
@@ -317,6 +319,16 @@ dotnet tool install --global csharp-ls
 node dist/examples/csharp-example.js
 ```
 
+### PHP Example
+
+```bash
+# Install Intelephense
+npm install -g intelephense
+
+# Run the example
+node dist/examples/php-example.js
+```
+
 ### Perl Example
 
 ```bash
@@ -419,6 +431,7 @@ The bridge server supports starting LSP servers for multiple languages:
 | Java | `language`, `rootUri` |
 | Kotlin | `language`, `rootUri` |
 | Perl | `language`, `rootUri`, `serverPath` |
+| PHP | `language`, `rootUri` |
 | Python | `language`, `rootUri`, `serverDir` |
 | Ruby | `language`, `rootUri` |
 | Rust | `language`, `rootUri` |

@@ -17,6 +17,7 @@ import {
   ClojureStartBody,
   KotlinStartBody,
   GoStartBody,
+  PhpStartBody,
 } from './bridge-types';
 
 import { createTypescriptLspClient } from '../lsp-server/typescript-lsp-server';
@@ -34,6 +35,7 @@ import { createTerraformLspClient } from '../lsp-server/terraform-lsp-server';
 import { createClojureLspClient } from '../lsp-server/clojure-lsp-server';
 import { createKotlinLspClient } from '../lsp-server/kotlin-lsp-server';
 import { createGoLspClient } from '../lsp-server/go-lsp-server';
+import { createPhpLspClient } from '../lsp-server/php-lsp-server';
 
 export function createLspClientForLanguage(body: StartBody): LSPClient {
   switch (body.language) {
@@ -148,6 +150,13 @@ export function createLspClientForLanguage(body: StartBody): LSPClient {
       return createGoLspClient({
         rootUri: opts.rootUri,
         serverPath: opts.serverPath,
+        serverArgs: opts.serverArgs,
+      });
+    }
+    case 'php': {
+      const opts = body as PhpStartBody;
+      return createPhpLspClient({
+        rootUri: opts.rootUri,
         serverArgs: opts.serverArgs,
       });
     }

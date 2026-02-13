@@ -27,7 +27,8 @@ export type SupportedLanguage =
   | 'terraform'
   | 'clojure'
   | 'kotlin'
-  | 'go';
+  | 'go'
+  | 'php';
 
 // Base start body with common fields
 interface StartBodyBase {
@@ -120,6 +121,10 @@ export interface GoStartBody extends StartBodyBase {
   serverPath?: string;
 }
 
+export interface PhpStartBody extends StartBodyBase {
+  language: 'php';
+}
+
 // Union type for all start body variants
 export type StartBody =
   | TypescriptStartBody
@@ -136,7 +141,8 @@ export type StartBody =
   | TerraformStartBody
   | ClojureStartBody
   | KotlinStartBody
-  | GoStartBody;
+  | GoStartBody
+  | PhpStartBody;
 
 // Document body types
 export interface DocumentOpenBody {
