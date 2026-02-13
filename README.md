@@ -567,4 +567,4 @@ This creates `src/bridge/schemas/index.ts` with Fastify-compatible schemas.
 
 ## License
 
-MIT
+This project is licensed under the [MIT License](LICENSE.md).
