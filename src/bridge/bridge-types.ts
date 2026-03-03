@@ -29,7 +29,8 @@ export type SupportedLanguage =
   | 'kotlin'
   | 'go'
   | 'php'
-  | 'pickbasic';
+  | 'pickbasic'
+  | 'vax-pascal';
 
 // Base start body with common fields
 interface StartBodyBase {
@@ -132,6 +133,12 @@ export interface PickbasicStartBody extends StartBodyBase {
   serverDir: string;
 }
 
+export interface VaxPascalStartBody extends StartBodyBase {
+  language: 'vax-pascal';
+  /** Directory containing the vax-pascal-lsp installation (with poetry) */
+  serverDir: string;
+}
+
 // Union type for all start body variants
 export type StartBody =
   | TypescriptStartBody
@@ -150,7 +157,8 @@ export type StartBody =
   | KotlinStartBody
   | GoStartBody
   | PhpStartBody
-  | PickbasicStartBody;
+  | PickbasicStartBody
+  | VaxPascalStartBody;
 
 // Document body types
 export interface DocumentOpenBody {

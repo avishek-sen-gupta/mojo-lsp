@@ -12,7 +12,7 @@ A generic Language Server Protocol (LSP) client library for Node.js built on top
 
 ## Features
 
-- **Multi-language support** - Pre-configured factory modules for 17 languages, and counting
+- **Multi-language support** - Pre-configured factory modules for 18 languages, and counting
 - **Simple API** - Easy-to-use client with methods for completions, hover, go-to-definition, find references, and document symbols
 - **REST Bridge Server** - HTTP API that exposes LSP functionality over REST with OpenAPI documentation
 - **Flexible connections** - Supports both stdio and socket-based LSP server connections
@@ -106,6 +106,7 @@ Factory modules provide pre-configured LSP clients for each language:
 | SQL | `createSqlLspClient()` | `lsp-server/sql-lsp-server` |
 | Terraform | `createTerraformLspClient()` | `lsp-server/terraform-lsp-server` |
 | TypeScript | `createTypescriptLspClient()` | `lsp-server/typescript-lsp-server` |
+| VAX Pascal | `createVaxPascalLspClient()` | `lsp-server/vax-pascal-lsp-server` |
 
 Each module also exports a `find*Files()` helper function to discover source files.
 
@@ -182,6 +183,7 @@ The following LSP servers have been tested with this client:
 | SQL | sql-language-server | https://github.com/joe-re/sql-language-server | ⚠️ Not working yet |
 | Terraform | terraform-ls | https://github.com/hashicorp/terraform-ls | |
 | TypeScript | typescript-language-server | https://github.com/typescript-language-server/typescript-language-server | |
+| VAX Pascal | vax-pascal-lsp | https://github.com/avishek-sen-gupta/vax-pascal-treesitter-lsp | ⚠️ Experimental, Poetry-based |
 
 ## Running the Examples
 
@@ -342,6 +344,17 @@ poetry install
 node dist/examples/pickbasic-example.js
 ```
 
+### VAX Pascal Example
+
+```bash
+# Set up vax-pascal-lsp (requires Poetry)
+cd /path/to/vax-pascal-treesitter-lsp/lsp
+poetry install
+
+# Run the example
+node dist/examples/vax-pascal-example.js
+```
+
 ### Perl Example
 
 ```bash
@@ -452,6 +465,7 @@ The bridge server supports starting LSP servers for multiple languages:
 | SQL | `language`, `rootUri`, `serverPath` |
 | Terraform | `language`, `rootUri` |
 | TypeScript | `language`, `rootUri` |
+| VAX Pascal | `language`, `rootUri`, `serverDir` |
 
 > **Note:** The actual LSP servers must be installed separately. This library only provides the client and bridge infrastructure. See the [Supported Languages](#supported-languages) section for installation instructions for each language server.
 

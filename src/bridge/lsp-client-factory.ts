@@ -19,6 +19,7 @@ import {
   GoStartBody,
   PhpStartBody,
   PickbasicStartBody,
+  VaxPascalStartBody,
 } from './bridge-types';
 
 import { createTypescriptLspClient } from '../lsp-server/typescript-lsp-server';
@@ -38,6 +39,7 @@ import { createKotlinLspClient } from '../lsp-server/kotlin-lsp-server';
 import { createGoLspClient } from '../lsp-server/go-lsp-server';
 import { createPhpLspClient } from '../lsp-server/php-lsp-server';
 import { createPickbasicLspClient } from '../lsp-server/pickbasic-lsp-server';
+import { createVaxPascalLspClient } from '../lsp-server/vax-pascal-lsp-server';
 
 export function createLspClientForLanguage(body: StartBody): LSPClient {
   switch (body.language) {
@@ -165,6 +167,14 @@ export function createLspClientForLanguage(body: StartBody): LSPClient {
     case 'pickbasic': {
       const opts = body as PickbasicStartBody;
       return createPickbasicLspClient({
+        rootUri: opts.rootUri,
+        serverDir: opts.serverDir,
+        serverArgs: opts.serverArgs,
+      });
+    }
+    case 'vax-pascal': {
+      const opts = body as VaxPascalStartBody;
+      return createVaxPascalLspClient({
         rootUri: opts.rootUri,
         serverDir: opts.serverDir,
         serverArgs: opts.serverArgs,
