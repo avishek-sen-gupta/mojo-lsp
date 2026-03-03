@@ -18,6 +18,7 @@ import {
   KotlinStartBody,
   GoStartBody,
   PhpStartBody,
+  PickbasicStartBody,
 } from './bridge-types';
 
 import { createTypescriptLspClient } from '../lsp-server/typescript-lsp-server';
@@ -36,6 +37,7 @@ import { createClojureLspClient } from '../lsp-server/clojure-lsp-server';
 import { createKotlinLspClient } from '../lsp-server/kotlin-lsp-server';
 import { createGoLspClient } from '../lsp-server/go-lsp-server';
 import { createPhpLspClient } from '../lsp-server/php-lsp-server';
+import { createPickbasicLspClient } from '../lsp-server/pickbasic-lsp-server';
 
 export function createLspClientForLanguage(body: StartBody): LSPClient {
   switch (body.language) {
@@ -157,6 +159,14 @@ export function createLspClientForLanguage(body: StartBody): LSPClient {
       const opts = body as PhpStartBody;
       return createPhpLspClient({
         rootUri: opts.rootUri,
+        serverArgs: opts.serverArgs,
+      });
+    }
+    case 'pickbasic': {
+      const opts = body as PickbasicStartBody;
+      return createPickbasicLspClient({
+        rootUri: opts.rootUri,
+        serverDir: opts.serverDir,
         serverArgs: opts.serverArgs,
       });
     }

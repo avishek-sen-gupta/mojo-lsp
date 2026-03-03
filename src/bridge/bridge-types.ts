@@ -28,7 +28,8 @@ export type SupportedLanguage =
   | 'clojure'
   | 'kotlin'
   | 'go'
-  | 'php';
+  | 'php'
+  | 'pickbasic';
 
 // Base start body with common fields
 interface StartBodyBase {
@@ -125,6 +126,12 @@ export interface PhpStartBody extends StartBodyBase {
   language: 'php';
 }
 
+export interface PickbasicStartBody extends StartBodyBase {
+  language: 'pickbasic';
+  /** Directory containing the pickbasic-lsp installation (with poetry) */
+  serverDir: string;
+}
+
 // Union type for all start body variants
 export type StartBody =
   | TypescriptStartBody
@@ -142,7 +149,8 @@ export type StartBody =
   | ClojureStartBody
   | KotlinStartBody
   | GoStartBody
-  | PhpStartBody;
+  | PhpStartBody
+  | PickbasicStartBody;
 
 // Document body types
 export interface DocumentOpenBody {

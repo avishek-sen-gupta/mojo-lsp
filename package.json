@@ -25,7 +25,8 @@
     "test:clojure": "vitest run clojure-lsp",
     "test:kotlin": "vitest run kotlin-lsp",
     "test:go": "vitest run go-lsp",
-    "test:php": "vitest run php-lsp"
+    "test:php": "vitest run php-lsp",
+    "test:pickbasic": "vitest run pickbasic-lsp"
   },
   "keywords": [
     "lsp",

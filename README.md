@@ -12,7 +12,7 @@ A generic Language Server Protocol (LSP) client library for Node.js built on top
 
 ## Features
 
-- **Multi-language support** - Pre-configured factory modules for ~15 languages, and counting
+- **Multi-language support** - Pre-configured factory modules for 17 languages, and counting
 - **Simple API** - Easy-to-use client with methods for completions, hover, go-to-definition, find references, and document symbols
 - **REST Bridge Server** - HTTP API that exposes LSP functionality over REST with OpenAPI documentation
 - **Flexible connections** - Supports both stdio and socket-based LSP server connections
@@ -99,6 +99,7 @@ Factory modules provide pre-configured LSP clients for each language:
 | Kotlin | `createKotlinLspClient()` | `lsp-server/kotlin-lsp-server` |
 | Perl | `createPerlLspClient()` | `lsp-server/perl-lsp-server` |
 | PHP | `createPhpLspClient()` | `lsp-server/php-lsp-server` |
+| PickBASIC | `createPickbasicLspClient()` | `lsp-server/pickbasic-lsp-server` |
 | Python | `createPythonLspClient()` | `lsp-server/python-lsp-server` |
 | Ruby | `createRubyLspClient()` | `lsp-server/ruby-lsp-server` |
 | Rust | `createRustLspClient()` | `lsp-server/rust-lsp-server` |
@@ -174,6 +175,7 @@ The following LSP servers have been tested with this client:
 | Kotlin | kotlin-language-server | https://github.com/fwcd/kotlin-language-server | |
 | Perl | PerlNavigator | https://github.com/bscan/PerlNavigator | |
 | PHP | Intelephense | https://intelephense.com/ | |
+| PickBASIC | pickbasic-lsp | https://github.com/avishek-sen-gupta/pickbasic-grammar | ⚠️ Experimental, Poetry-based |
 | Python | pylsp | https://github.com/python-lsp/python-lsp-server | |
 | Ruby | Solargraph | https://solargraph.org/ | |
 | Rust | rust-analyzer | https://rust-analyzer.github.io/ | |
@@ -329,6 +331,17 @@ npm install -g intelephense
 node dist/examples/php-example.js
 ```
 
+### PickBASIC Example
+
+```bash
+# Set up pickbasic-lsp (requires Poetry)
+cd /path/to/pickbasic-grammar/pickbasic-lsp
+poetry install
+
+# Run the example
+node dist/examples/pickbasic-example.js
+```
+
 ### Perl Example
 
 ```bash
@@ -432,6 +445,7 @@ The bridge server supports starting LSP servers for multiple languages:
 | Kotlin | `language`, `rootUri` |
 | Perl | `language`, `rootUri`, `serverPath` |
 | PHP | `language`, `rootUri` |
+| PickBASIC | `language`, `rootUri`, `serverDir` |
 | Python | `language`, `rootUri`, `serverDir` |
 | Ruby | `language`, `rootUri` |
 | Rust | `language`, `rootUri` |
