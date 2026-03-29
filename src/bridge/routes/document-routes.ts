@@ -8,7 +8,7 @@ export function registerDocumentRoutes(app: FastifyInstance, state: BridgeState)
     reply: FastifyReply
   ): Promise<void> => {
     if (!state.client) {
-      reply.code(400).send({ error: 'LSP server not running. Call /start first.' });
+      return reply.code(400).send({ error: 'LSP server not running. Call /start first.' });
     }
   };
 
