@@ -73,7 +73,7 @@ export class LSPBridgeServer {
 
   private registerCors(app: FastifyInstance): void {
     app.register(cors, {
-      origin: '*',
+      origin: false,
       methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type'],
     });
