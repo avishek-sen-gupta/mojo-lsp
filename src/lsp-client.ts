@@ -75,7 +75,7 @@ export class LSPClient {
   private connection: ProtocolConnection | null = null;
   private serverCapabilities: InitializeResult | null = null;
   private openDocuments: Map<string, DocumentInfo> = new Map();
-  private diagnosticsHandler: ((params: PublishDiagnosticsParams) => void) | null = null;
+  private diagnosticsHandlers: ((params: PublishDiagnosticsParams) => void)[] = [];
 
   constructor(private options: LSPClientOptions) {}
 
@@ -245,8 +245,8 @@ export class LSPClient {
     this.connection.onNotification(
       PublishDiagnosticsNotification.type,
       (params: PublishDiagnosticsParams) => {
-        if (this.diagnosticsHandler) {
-          this.diagnosticsHandler(params);
+        for (const handler of this.diagnosticsHandlers) {
+          handler(params);
         }
       }
     );
@@ -280,7 +280,7 @@ export class LSPClient {
   }
 
   onDiagnostics(handler: (params: PublishDiagnosticsParams) => void): void {
-    this.diagnosticsHandler = handler;
+    this.diagnosticsHandlers.push(handler);
   }
 
   async openDocument(uri: string, languageId: string, text: string): Promise<void> {
@@ -440,8 +440,8 @@ export class LSPClient {
 
     try {
       await this.connection.sendRequest(ShutdownRequest.type);
-    } catch {
-      // Server may have already exited
+    } catch (error) {
+      this.options.logger?.info(`Shutdown request failed (server may have already exited): ${error}`);
     }
 
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -449,8 +449,8 @@ export class LSPClient {
     if (!this.socket) {
       try {
         this.connection.sendNotification(ExitNotification.type);
-      } catch {
-        // Server may have already closed the connection
+      } catch (error) {
+        this.options.logger?.info(`Exit notification failed (server may have already closed): ${error}`);
       }
     }
 
@@ -459,22 +459,28 @@ export class LSPClient {
 
   private async cleanup(): Promise<void> {
     if (this.socket) {
-      try { this.socket.destroy(); } catch { /* socket may already be destroyed */ }
+      try { this.socket.destroy(); } catch (e) {
+        this.options.logger?.info(`Socket cleanup: ${e}`);
+      }
       this.socket = null;
     }
 
     if (this.connection) {
-      try { this.connection.dispose(); } catch { /* connection may already be disposed */ }
+      try { this.connection.dispose(); } catch (e) {
+        this.options.logger?.info(`Connection cleanup: ${e}`);
+      }
       this.connection = null;
     }
 
     if (this.process) {
-      try { this.process.kill(); } catch { /* process may have already exited */ }
+      try { this.process.kill(); } catch (e) {
+        this.options.logger?.info(`Process cleanup: ${e}`);
+      }
       this.process = null;
     }
 
     this.serverCapabilities = null;
     this.openDocuments.clear();
-    this.diagnosticsHandler = null;
+    this.diagnosticsHandlers = [];
   }
 }
