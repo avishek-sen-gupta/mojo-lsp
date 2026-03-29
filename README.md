@@ -12,7 +12,7 @@ A generic Language Server Protocol (LSP) client library for Node.js built on top
 
 ## Features
 
-- **Multi-language support** - Pre-configured factory modules for 18 languages, and counting
+- **Multi-language support** - Pre-configured factory modules for 19 languages, and counting
 - **Simple API** - Easy-to-use client with methods for completions, hover, go-to-definition, find references, and document symbols
 - **REST Bridge Server** - HTTP API that exposes LSP functionality over REST with OpenAPI documentation
 - **Flexible connections** - Supports both stdio and socket-based LSP server connections
@@ -95,6 +95,7 @@ Factory modules provide pre-configured LSP clients for each language:
 | C# | `createCsharpLspClient()` | `lsp-server/csharp-lsp-server` |
 | COBOL | `createCobolLspClient()` | `lsp-server/cobol-lsp-server` |
 | Go | `createGoLspClient()` | `lsp-server/go-lsp-server` |
+| HLASM | `createHlasmLspClient()` | `lsp-server/hlasm-lsp-server` |
 | Java | `createJavaLspClient()` | `lsp-server/java-lsp-server` |
 | Kotlin | `createKotlinLspClient()` | `lsp-server/kotlin-lsp-server` |
 | Perl | `createPerlLspClient()` | `lsp-server/perl-lsp-server` |
@@ -172,6 +173,7 @@ The following LSP servers have been tested with this client:
 | C# | csharp-ls | https://github.com/razzmatazz/csharp-language-server | |
 | COBOL | Che4z COBOL Language Server | https://github.com/eclipse-che4z/che-che4z-lsp-for-cobol | |
 | Go | gopls | https://github.com/golang/tools/tree/master/gopls | |
+| HLASM | hlasm-lsp | https://github.com/avishek-sen-gupta/tape-z | ⚠️ Experimental, Poetry-based |
 | Java | Eclipse JDT Language Server | https://github.com/eclipse-jdtls/eclipse.jdt.ls | |
 | Kotlin | kotlin-language-server | https://github.com/fwcd/kotlin-language-server | |
 | Perl | PerlNavigator | https://github.com/bscan/PerlNavigator | |
@@ -355,6 +357,17 @@ poetry install
 node dist/examples/vax-pascal-example.js
 ```
 
+### HLASM Example
+
+```bash
+# Set up hlasm-lsp (requires Poetry)
+cd /path/to/tape-z/hlasm-lsp
+poetry install
+
+# Run the example
+node dist/examples/hlasm-example.js
+```
+
 ### Perl Example
 
 ```bash
@@ -454,6 +467,7 @@ The bridge server supports starting LSP servers for multiple languages:
 | C# | `language`, `rootUri`, `solutionPath` |
 | COBOL | `language`, `rootUri`, `serverJar` |
 | Go | `language`, `rootUri` |
+| HLASM | `language`, `rootUri`, `serverDir` |
 | Java | `language`, `rootUri` |
 | Kotlin | `language`, `rootUri` |
 | Perl | `language`, `rootUri`, `serverPath` |

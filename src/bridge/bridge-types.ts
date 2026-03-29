@@ -30,7 +30,8 @@ export type SupportedLanguage =
   | 'go'
   | 'php'
   | 'pickbasic'
-  | 'vax-pascal';
+  | 'vax-pascal'
+  | 'hlasm';
 
 // Base start body with common fields
 interface StartBodyBase {
@@ -139,6 +140,12 @@ export interface VaxPascalStartBody extends StartBodyBase {
   serverDir: string;
 }
 
+export interface HlasmStartBody extends StartBodyBase {
+  language: 'hlasm';
+  /** Directory containing the hlasm-lsp installation (with poetry) */
+  serverDir: string;
+}
+
 // Union type for all start body variants
 export type StartBody =
   | TypescriptStartBody
@@ -158,7 +165,8 @@ export type StartBody =
   | GoStartBody
   | PhpStartBody
   | PickbasicStartBody
-  | VaxPascalStartBody;
+  | VaxPascalStartBody
+  | HlasmStartBody;
 
 // Document body types
 export interface DocumentOpenBody {
