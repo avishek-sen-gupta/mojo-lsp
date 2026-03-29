@@ -14,10 +14,12 @@ import {
 export class LSPBridgeServer {
   private app: FastifyInstance;
   private port: number;
+  private host: string;
   private state: BridgeState;
 
-  constructor(port: number = 3000) {
+  constructor(port: number = 3000, host: string = '127.0.0.1') {
     this.port = port;
+    this.host = host;
     this.state = {
       client: null,
       language: null,
@@ -95,8 +97,8 @@ export class LSPBridgeServer {
   }
 
   async start(): Promise<void> {
-    await this.app.listen({ port: this.port, host: '0.0.0.0' });
-    console.log(`LSP Bridge Server listening on port ${this.port}`);
+    await this.app.listen({ port: this.port, host: this.host });
+    console.log(`LSP Bridge Server listening on ${this.host}:${this.port}`);
   }
 
   async stop(): Promise<void> {

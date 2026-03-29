@@ -437,6 +437,9 @@ npx tsx src/bridge/bridge-cli.ts --port 3013
 
 # Or run the compiled version
 node dist/bridge/bridge-cli.js --port 3013
+
+# Listen on all interfaces (default is 127.0.0.1 / localhost only)
+node dist/bridge/bridge-cli.js --host 0.0.0.0 --port 3013
 ```
 
 The server provides:

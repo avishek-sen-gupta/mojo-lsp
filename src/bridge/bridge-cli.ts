@@ -1,9 +1,10 @@
 #!/usr/bin/env npx tsx
 import { LSPBridgeServer } from './bridge-server';
 
-function parseArgs(): { port: number } {
+function parseArgs(): { port: number; host: string } {
   const args = process.argv.slice(2);
   let port = 3000;
+  let host = '127.0.0.1';
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--port' || args[i] === '-p') {
@@ -18,6 +19,12 @@ function parseArgs(): { port: number } {
         }
       }
       i++;
+    } else if (args[i] === '--host') {
+      const hostArg = args[i + 1];
+      if (hostArg) {
+        host = hostArg;
+      }
+      i++;
     } else if (args[i] === '--help' || args[i] === '-h') {
       console.log(`
 LSP Bridge Server
@@ -26,22 +33,24 @@ Usage: bridge-cli [options]
 
 Options:
   -p, --port <port>  Port to listen on (default: 3000)
+      --host <host>  Host to bind to (default: 127.0.0.1)
   -h, --help         Show this help message
 
 Example:
   bridge-cli --port 3000
+  bridge-cli --host 0.0.0.0 --port 3013  # listen on all interfaces
 `);
       process.exit(0);
     }
   }
 
-  return { port };
+  return { port, host };
 }
 
 async function main(): Promise<void> {
-  const { port } = parseArgs();
+  const { port, host } = parseArgs();
 
-  const server = new LSPBridgeServer(port);
+  const server = new LSPBridgeServer(port, host);
 
   // Handle graceful shutdown
   const shutdown = async () => {
