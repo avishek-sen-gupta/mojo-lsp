@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "server",
+  "dolt_database": "mojo_lsp",
+  "project_id": "9df1a399-341f-44b5-8b7d-be4d36e3d3de"
+}

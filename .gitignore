@@ -21,3 +21,8 @@ npm-debug.log*
 # Test files
 test.ts
 src/bridge/schemas/
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
