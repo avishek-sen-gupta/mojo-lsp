@@ -30,7 +30,7 @@ export class LSPBridgeServer {
 
   private createApp(): FastifyInstance {
     const app = Fastify({
-      logger: false,
+      logger: true,
     });
 
     this.registerSwagger(app);
@@ -90,15 +90,18 @@ export class LSPBridgeServer {
   }
 
   private registerErrorHandler(app: FastifyInstance): void {
-    app.setErrorHandler(async (error: Error, _request, reply) => {
-      const statusCode = error instanceof BadRequestError ? 400 : 500;
-      reply.code(statusCode).send({ error: error.message });
+    app.setErrorHandler(async (error: Error, request, reply) => {
+      if (error instanceof BadRequestError) {
+        reply.code(400).send({ error: error.message });
+      } else {
+        request.log.error(error);
+        reply.code(500).send({ error: 'Internal server error' });
+      }
     });
   }
 
   async start(): Promise<void> {
     await this.app.listen({ port: this.port, host: this.host });
-    console.log(`LSP Bridge Server listening on ${this.host}:${this.port}`);
   }
 
   async stop(): Promise<void> {
