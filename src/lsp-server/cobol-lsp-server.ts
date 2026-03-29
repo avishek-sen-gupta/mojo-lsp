@@ -26,6 +26,11 @@ export interface CobolLspServerOptions {
 export function createCobolLspClient(options: CobolLspServerOptions): LSPClient {
   const { serverJar, rootUri, logger, port = 1044, host = 'localhost' } = options;
 
+  const ALLOWED_HOSTS = ['localhost', '127.0.0.1', '::1'];
+  if (!ALLOWED_HOSTS.includes(host)) {
+    throw new Error(`Socket host must be one of ${ALLOWED_HOSTS.join(', ')}. Got: ${host}`);
+  }
+
   if (!fs.existsSync(serverJar)) {
     throw new Error(`Server JAR not found: ${serverJar}`);
   }
