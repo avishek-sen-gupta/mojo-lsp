@@ -1,4 +1,4 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyInstance } from 'fastify';
 import { BridgeState } from '../bridge-types';
 import {
   CompletionRoute,
@@ -7,16 +7,10 @@ import {
   ReferencesRoute,
   SymbolsRoute,
 } from './route-types';
+import { createRequireClient } from './route-guards';
 
 export function registerFeatureRoutes(app: FastifyInstance, state: BridgeState): void {
-  const requireClient = async (
-    _request: FastifyRequest,
-    reply: FastifyReply
-  ): Promise<void> => {
-    if (!state.client) {
-      return reply.code(400).send({ error: 'LSP server not running. Call /start first.' });
-    }
-  };
+  const requireClient = createRequireClient(state);
 
   app.post<CompletionRoute>('/completion', {
     preHandler: requireClient,
