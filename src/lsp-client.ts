@@ -47,6 +47,9 @@ import {
   StreamMessageWriter,
 } from 'vscode-jsonrpc/node';
 
+const SOCKET_CONNECTION_DELAY_MS = 2000;
+const SHUTDOWN_GRACE_PERIOD_MS = 100;
+
 export interface LSPClientOptions {
   serverCommand: string;
   serverArgs?: string[];
@@ -130,7 +133,7 @@ export class LSPClient {
     this.attachProcessHandlers();
 
     // Wait for the server to start listening
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, SOCKET_CONNECTION_DELAY_MS));
 
     this.socket = await new Promise<net.Socket>((resolve, reject) => {
       const socket = net.createConnection({ port, host }, () => {
@@ -444,7 +447,7 @@ export class LSPClient {
       this.options.logger?.info(`Shutdown request failed (server may have already exited): ${error}`);
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, SHUTDOWN_GRACE_PERIOD_MS));
 
     if (!this.socket) {
       try {

@@ -4,6 +4,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
 
+const DEFAULT_SERVER_PATH = 'gopls';
+
 export interface GoLspServerOptions {
   /** Root URI for the workspace */
   rootUri: string;
@@ -25,7 +27,7 @@ export interface GoLspServerOptions {
  */
 export function createGoLspClient(options: GoLspServerOptions): LSPClient {
   const { rootUri, logger, serverArgs = [] } = options;
-  const serverPath = options.serverPath || path.join(os.homedir(), 'go', 'bin', 'gopls');
+  const serverPath = options.serverPath || path.join(os.homedir(), 'go', 'bin', DEFAULT_SERVER_PATH);
 
   if (!fs.existsSync(serverPath)) {
     throw new Error(`gopls not found at: ${serverPath}. Install with: go install golang.org/x/tools/gopls@latest`);

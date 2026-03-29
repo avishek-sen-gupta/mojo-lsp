@@ -3,6 +3,9 @@ import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
 
+const SERVER_COMMAND = 'bash-language-server';
+const DEFAULT_ARGS = ['start'];
+
 export interface BashLspServerOptions {
   /** Root URI for the workspace */
   rootUri: string;
@@ -21,10 +24,10 @@ export interface BashLspServerOptions {
  * @see https://github.com/bash-lsp/bash-language-server
  */
 export function createBashLspClient(options: BashLspServerOptions): LSPClient {
-  const { rootUri, logger, serverArgs = ['start'] } = options;
+  const { rootUri, logger, serverArgs = DEFAULT_ARGS } = options;
 
   return new LSPClient({
-    serverCommand: 'bash-language-server',
+    serverCommand: SERVER_COMMAND,
     serverArgs,
     rootUri,
     logger,

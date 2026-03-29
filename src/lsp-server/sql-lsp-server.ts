@@ -2,6 +2,8 @@ import { LSPClient } from '../lsp-client';
 import { Logger } from 'vscode-languageserver-protocol';
 import * as fs from 'fs';
 
+const DEFAULT_ARGS = ['up', '--method', 'stdio'];
+
 export interface SqlLspServerOptions {
   /** Path to the sql-language-server executable */
   serverPath: string;
@@ -22,7 +24,7 @@ export interface SqlLspServerOptions {
  * @see https://github.com/joe-re/sql-language-server
  */
 export function createSqlLspClient(options: SqlLspServerOptions): LSPClient {
-  const { serverPath, rootUri, logger, serverArgs = ['up', '--method', 'stdio'] } = options;
+  const { serverPath, rootUri, logger, serverArgs = DEFAULT_ARGS } = options;
 
   if (!fs.existsSync(serverPath)) {
     throw new Error(`SQL language server not found: ${serverPath}`);

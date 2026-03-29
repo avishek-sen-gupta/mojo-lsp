@@ -3,6 +3,10 @@ import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
 
+const SERVER_COMMAND = 'java';
+const ALLOWED_HOSTS = ['localhost', '127.0.0.1', '::1'];
+const DEFAULT_PORT = 1044;
+
 export interface CobolLspServerOptions {
   /** Path to the Che4z COBOL LSP server JAR file */
   serverJar: string;
@@ -24,9 +28,7 @@ export interface CobolLspServerOptions {
  * @see https://github.com/eclipse-che4z/che-che4z-lsp-for-cobol
  */
 export function createCobolLspClient(options: CobolLspServerOptions): LSPClient {
-  const { serverJar, rootUri, logger, port = 1044, host = 'localhost' } = options;
-
-  const ALLOWED_HOSTS = ['localhost', '127.0.0.1', '::1'];
+  const { serverJar, rootUri, logger, port = DEFAULT_PORT, host = 'localhost' } = options;
   if (!ALLOWED_HOSTS.includes(host)) {
     throw new Error(`Socket host must be one of ${ALLOWED_HOSTS.join(', ')}. Got: ${host}`);
   }
@@ -36,7 +38,7 @@ export function createCobolLspClient(options: CobolLspServerOptions): LSPClient 
   }
 
   return new LSPClient({
-    serverCommand: 'java',
+    serverCommand: SERVER_COMMAND,
     serverArgs: ['-jar', serverJar],
     rootUri,
     logger,

@@ -3,6 +3,9 @@ import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
 
+const SERVER_COMMAND = 'typescript-language-server';
+const DEFAULT_ARGS = ['--stdio'];
+
 export interface TypescriptLspServerOptions {
   /** Root URI for the workspace */
   rootUri: string;
@@ -21,10 +24,10 @@ export interface TypescriptLspServerOptions {
  * @see https://github.com/typescript-language-server/typescript-language-server
  */
 export function createTypescriptLspClient(options: TypescriptLspServerOptions): LSPClient {
-  const { rootUri, logger, serverArgs = ['--stdio'] } = options;
+  const { rootUri, logger, serverArgs = DEFAULT_ARGS } = options;
 
   return new LSPClient({
-    serverCommand: 'typescript-language-server',
+    serverCommand: SERVER_COMMAND,
     serverArgs,
     rootUri,
     logger,

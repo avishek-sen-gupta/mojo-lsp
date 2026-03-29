@@ -3,6 +3,9 @@ import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
 
+const SERVER_COMMAND = 'terraform-ls';
+const DEFAULT_ARGS = ['serve'];
+
 export interface TerraformLspServerOptions {
   /** Root URI for the workspace */
   rootUri: string;
@@ -21,10 +24,10 @@ export interface TerraformLspServerOptions {
  * @see https://github.com/hashicorp/terraform-ls
  */
 export function createTerraformLspClient(options: TerraformLspServerOptions): LSPClient {
-  const { rootUri, logger, serverArgs = ['serve'] } = options;
+  const { rootUri, logger, serverArgs = DEFAULT_ARGS } = options;
 
   return new LSPClient({
-    serverCommand: 'terraform-ls',
+    serverCommand: SERVER_COMMAND,
     serverArgs,
     rootUri,
     logger,

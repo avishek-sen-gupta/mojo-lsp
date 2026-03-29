@@ -3,6 +3,9 @@ import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
 
+const SERVER_COMMAND = 'kotlin-lsp';
+const DEFAULT_ARGS = ['--stdio'];
+
 export interface KotlinLspServerOptions {
   /** Root URI for the workspace */
   rootUri: string;
@@ -21,10 +24,10 @@ export interface KotlinLspServerOptions {
  * @see https://github.com/fwcd/kotlin-language-server
  */
 export function createKotlinLspClient(options: KotlinLspServerOptions): LSPClient {
-  const { rootUri, logger, serverArgs = ['--stdio'] } = options;
+  const { rootUri, logger, serverArgs = DEFAULT_ARGS } = options;
 
   return new LSPClient({
-    serverCommand: 'kotlin-lsp',
+    serverCommand: SERVER_COMMAND,
     serverArgs,
     rootUri,
     logger,

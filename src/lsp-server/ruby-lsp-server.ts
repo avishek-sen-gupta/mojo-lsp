@@ -3,6 +3,9 @@ import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
 
+const SERVER_COMMAND = 'solargraph';
+const DEFAULT_ARGS = ['stdio'];
+
 export interface RubyLspServerOptions {
   /** Root URI for the workspace (the Ruby project directory) */
   rootUri: string;
@@ -23,13 +26,13 @@ export interface RubyLspServerOptions {
  * @see https://solargraph.org/
  */
 export function createRubyLspClient(options: RubyLspServerOptions): LSPClient {
-  const { rootUri, logger, serverArgs = ['stdio'] } = options;
+  const { rootUri, logger, serverArgs = DEFAULT_ARGS } = options;
 
   // Extract project directory from rootUri for cwd
   const projectDir = options.cwd || rootUri.replace('file://', '');
 
   return new LSPClient({
-    serverCommand: 'solargraph',
+    serverCommand: SERVER_COMMAND,
     serverArgs,
     rootUri,
     cwd: projectDir,

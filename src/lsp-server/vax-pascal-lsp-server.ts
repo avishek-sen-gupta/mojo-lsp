@@ -3,6 +3,7 @@ import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
 
+const SERVER_COMMAND = 'poetry';
 const VAX_PASCAL_EXTENSIONS = ['.pas', '.p'];
 const EXCLUDED_DIRS = ['node_modules', 'dist', 'build', 'out', '.venv', 'venv', '__pycache__'];
 
@@ -31,7 +32,7 @@ export function createVaxPascalLspClient(options: VaxPascalLspServerOptions): LS
   }
 
   return new LSPClient({
-    serverCommand: 'poetry',
+    serverCommand: SERVER_COMMAND,
     serverArgs: ['run', 'vax-pascal-lsp', ...serverArgs],
     rootUri,
     logger,

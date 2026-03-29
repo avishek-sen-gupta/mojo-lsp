@@ -3,6 +3,9 @@ import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
 
+const SERVER_COMMAND = 'clangd';
+const DEFAULT_ARGS = ['--log=error'];
+
 export interface CppLspServerOptions {
   /** Root URI for the workspace (the C++ project directory) */
   rootUri: string;
@@ -26,10 +29,10 @@ export interface CppLspServerOptions {
  * @see https://clangd.llvm.org/
  */
 export function createCppLspClient(options: CppLspServerOptions): LSPClient {
-  const { rootUri, logger, serverArgs = ['--log=error'] } = options;
+  const { rootUri, logger, serverArgs = DEFAULT_ARGS } = options;
 
   return new LSPClient({
-    serverCommand: 'clangd',
+    serverCommand: SERVER_COMMAND,
     serverArgs,
     rootUri,
     logger,

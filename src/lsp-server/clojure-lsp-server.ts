@@ -3,6 +3,8 @@ import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
 
+const SERVER_COMMAND = 'clojure-lsp';
+
 export interface ClojureLspServerOptions {
   /** Root URI for the workspace */
   rootUri: string;
@@ -24,7 +26,7 @@ export function createClojureLspClient(options: ClojureLspServerOptions): LSPCli
   const { rootUri, logger, serverArgs = [] } = options;
 
   return new LSPClient({
-    serverCommand: 'clojure-lsp',
+    serverCommand: SERVER_COMMAND,
     serverArgs,
     rootUri,
     logger,

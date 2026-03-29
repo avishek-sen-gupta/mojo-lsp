@@ -3,6 +3,9 @@ import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
 
+const SERVER_COMMAND = 'poetry';
+const DEFAULT_ARGS = ['-v'];
+
 export interface PythonLspServerOptions {
   /** Root URI for the workspace (the Python project directory) */
   rootUri: string;
@@ -23,14 +26,14 @@ export interface PythonLspServerOptions {
  * @see https://github.com/python-lsp/python-lsp-server
  */
 export function createPythonLspClient(options: PythonLspServerOptions): LSPClient {
-  const { rootUri, serverDir, logger, serverArgs = ['-v'] } = options;
+  const { rootUri, serverDir, logger, serverArgs = DEFAULT_ARGS } = options;
 
   if (!fs.existsSync(serverDir)) {
     throw new Error(`Server directory not found: ${serverDir}`);
   }
 
   return new LSPClient({
-    serverCommand: 'poetry',
+    serverCommand: SERVER_COMMAND,
     serverArgs: ['run', 'pylsp', ...serverArgs],
     rootUri,
     logger,

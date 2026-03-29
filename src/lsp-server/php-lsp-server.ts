@@ -3,6 +3,9 @@ import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
 
+const SERVER_COMMAND = 'intelephense';
+const DEFAULT_ARGS = ['--stdio'];
+
 export interface PhpLspServerOptions {
   /** Root URI for the workspace */
   rootUri: string;
@@ -21,10 +24,10 @@ export interface PhpLspServerOptions {
  * @see https://github.com/bmewburn/intelephense-docs
  */
 export function createPhpLspClient(options: PhpLspServerOptions): LSPClient {
-  const { rootUri, logger, serverArgs = ['--stdio'] } = options;
+  const { rootUri, logger, serverArgs = DEFAULT_ARGS } = options;
 
   return new LSPClient({
-    serverCommand: 'intelephense',
+    serverCommand: SERVER_COMMAND,
     serverArgs,
     rootUri,
     logger,

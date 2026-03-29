@@ -3,6 +3,8 @@ import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
 
+const DEFAULT_ARGS = ['--stdio'];
+
 export interface PerlLspServerOptions {
   /** Path to the PerlNavigator executable */
   serverPath: string;
@@ -23,7 +25,7 @@ export interface PerlLspServerOptions {
  * @see https://github.com/bscan/PerlNavigator
  */
 export function createPerlLspClient(options: PerlLspServerOptions): LSPClient {
-  const { serverPath, rootUri, logger, serverArgs = ['--stdio'] } = options;
+  const { serverPath, rootUri, logger, serverArgs = DEFAULT_ARGS } = options;
 
   if (!fs.existsSync(serverPath)) {
     throw new Error(`PerlNavigator not found: ${serverPath}`);

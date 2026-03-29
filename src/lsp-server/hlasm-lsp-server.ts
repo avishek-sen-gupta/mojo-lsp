@@ -3,6 +3,7 @@ import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
 
+const SERVER_COMMAND = 'poetry';
 const HLASM_EXTENSIONS = ['.hlasm', '.asm', '.mac', '.copy', '.s'];
 const EXCLUDED_DIRS = ['node_modules', 'dist', 'build', 'out', '.venv', 'venv', '__pycache__'];
 
@@ -31,7 +32,7 @@ export function createHlasmLspClient(options: HlasmLspServerOptions): LSPClient 
   }
 
   return new LSPClient({
-    serverCommand: 'poetry',
+    serverCommand: SERVER_COMMAND,
     serverArgs: ['run', 'python', '-m', 'hlasm_lsp', ...serverArgs],
     rootUri,
     logger,

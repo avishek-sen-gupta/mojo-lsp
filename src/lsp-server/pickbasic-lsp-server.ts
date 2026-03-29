@@ -3,6 +3,7 @@ import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
 
+const SERVER_COMMAND = 'poetry';
 const PICKBASIC_EXTENSIONS = ['.bp', '.b', '.bas', '.basic'];
 const EXCLUDED_DIRS = ['node_modules', 'dist', 'build', 'out', '.venv', 'venv', '__pycache__'];
 
@@ -33,7 +34,7 @@ export function createPickbasicLspClient(options: PickbasicLspServerOptions): LS
   }
 
   return new LSPClient({
-    serverCommand: 'poetry',
+    serverCommand: SERVER_COMMAND,
     serverArgs: ['run', 'pickbasic-lsp', ...serverArgs],
     rootUri,
     logger,

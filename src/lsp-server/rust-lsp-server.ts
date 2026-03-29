@@ -3,6 +3,8 @@ import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
 
+const SERVER_COMMAND = 'rust-analyzer';
+
 export interface RustLspServerOptions {
   /** Root URI for the workspace (the Rust project directory) */
   rootUri: string;
@@ -26,7 +28,7 @@ export function createRustLspClient(options: RustLspServerOptions): LSPClient {
   const { rootUri, logger, serverArgs = [] } = options;
 
   return new LSPClient({
-    serverCommand: 'rust-analyzer',
+    serverCommand: SERVER_COMMAND,
     serverArgs,
     rootUri,
     logger,

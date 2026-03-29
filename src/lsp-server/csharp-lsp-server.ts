@@ -3,6 +3,9 @@ import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
 
+const SERVER_COMMAND = 'csharp-ls';
+const DEFAULT_LOG_LEVEL = 'INFO';
+
 export interface CsharpLspServerOptions {
   /** Root URI for the workspace (the C# project/solution directory) */
   rootUri: string;
@@ -25,10 +28,10 @@ export interface CsharpLspServerOptions {
  * @see https://github.com/razzmatazz/csharp-language-server
  */
 export function createCsharpLspClient(options: CsharpLspServerOptions): LSPClient {
-  const { rootUri, solutionPath, logger, logLevel = 'INFO', serverArgs = [] } = options;
+  const { rootUri, solutionPath, logger, logLevel = DEFAULT_LOG_LEVEL, serverArgs = [] } = options;
 
   return new LSPClient({
-    serverCommand: 'csharp-ls',
+    serverCommand: SERVER_COMMAND,
     serverArgs: ['--loglevel', logLevel, '--solution', solutionPath, ...serverArgs],
     rootUri,
     logger,

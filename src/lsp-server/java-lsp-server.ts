@@ -3,6 +3,8 @@ import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
 
+const SERVER_COMMAND = 'jdtls';
+
 export interface JavaLspServerOptions {
   /** Root URI for the workspace (the Java project directory) */
   rootUri: string;
@@ -25,7 +27,7 @@ export function createJavaLspClient(options: JavaLspServerOptions): LSPClient {
   const { rootUri, logger, serverArgs = [] } = options;
 
   return new LSPClient({
-    serverCommand: 'jdtls',
+    serverCommand: SERVER_COMMAND,
     serverArgs,
     rootUri,
     logger,
