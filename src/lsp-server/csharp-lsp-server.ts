@@ -1,10 +1,11 @@
 import { LSPClient } from '../lsp-client';
 import { Logger } from 'vscode-languageserver-protocol';
-import * as path from 'path';
-import * as fs from 'fs';
+import { findFilesByExtension } from './find-files';
 
 const SERVER_COMMAND = 'csharp-ls';
 const DEFAULT_LOG_LEVEL = 'INFO';
+const CSHARP_EXTENSIONS = ['.cs'];
+const EXCLUDED_DIRS = ['bin', 'obj'];
 
 export interface CsharpLspServerOptions {
   /** Root URI for the workspace (the C# project/solution directory) */
@@ -42,18 +43,5 @@ export function createCsharpLspClient(options: CsharpLspServerOptions): LSPClien
  * Recursively find all C# files in a directory.
  */
 export function findCsharpFiles(dir: string): string[] {
-  const files: string[] = [];
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory() && !entry.name.startsWith('.') &&
-        entry.name !== 'bin' && entry.name !== 'obj') {
-      files.push(...findCsharpFiles(fullPath));
-    } else if (entry.isFile() && entry.name.endsWith('.cs')) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
+  return findFilesByExtension(dir, CSHARP_EXTENSIONS, EXCLUDED_DIRS);
 }

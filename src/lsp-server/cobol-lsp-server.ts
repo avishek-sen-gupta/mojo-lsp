@@ -1,11 +1,13 @@
 import { LSPClient } from '../lsp-client';
 import { Logger } from 'vscode-languageserver-protocol';
-import * as path from 'path';
 import * as fs from 'fs';
+import { findFilesByExtension } from './find-files';
 
 const SERVER_COMMAND = 'java';
 const ALLOWED_HOSTS = ['localhost', '127.0.0.1', '::1'];
 const DEFAULT_PORT = 1044;
+const COBOL_EXTENSIONS = ['.cob', '.cbl', '.cobol', '.CBL', '.COB', '.COBOL'];
+const EXCLUDED_DIRS = ['node_modules', 'target', 'build', 'dist'];
 
 export interface CobolLspServerOptions {
   /** Path to the Che4z COBOL LSP server JAR file */
@@ -50,20 +52,5 @@ export function createCobolLspClient(options: CobolLspServerOptions): LSPClient 
  * Recursively find all COBOL files in a directory.
  */
 export function findCobolFiles(dir: string): string[] {
-  const files: string[] = [];
-  const cobolExtensions = ['.cob', '.cbl', '.cobol', '.CBL', '.COB', '.COBOL'];
-
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory() && !entry.name.startsWith('.') &&
-        !['node_modules', 'target', 'build', 'dist'].includes(entry.name)) {
-      files.push(...findCobolFiles(fullPath));
-    } else if (entry.isFile() && cobolExtensions.some(ext => entry.name.endsWith(ext))) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
+  return findFilesByExtension(dir, COBOL_EXTENSIONS, EXCLUDED_DIRS);
 }

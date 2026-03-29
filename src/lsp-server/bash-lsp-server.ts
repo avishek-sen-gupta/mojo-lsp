@@ -1,10 +1,11 @@
 import { LSPClient } from '../lsp-client';
 import { Logger } from 'vscode-languageserver-protocol';
-import * as path from 'path';
-import * as fs from 'fs';
+import { findFilesByExtension } from './find-files';
 
 const SERVER_COMMAND = 'bash-language-server';
 const DEFAULT_ARGS = ['start'];
+const BASH_EXTENSIONS = ['.sh', '.bash'];
+const EXCLUDED_DIRS = ['node_modules', 'dist', 'build', 'out', 'vendor'];
 
 export interface BashLspServerOptions {
   /** Root URI for the workspace */
@@ -38,20 +39,5 @@ export function createBashLspClient(options: BashLspServerOptions): LSPClient {
  * Recursively find all Bash script files in a directory.
  */
 export function findBashFiles(dir: string): string[] {
-  const files: string[] = [];
-  const bashExtensions = ['.sh', '.bash'];
-
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory() && !entry.name.startsWith('.') &&
-        !['node_modules', 'dist', 'build', 'out', 'vendor'].includes(entry.name)) {
-      files.push(...findBashFiles(fullPath));
-    } else if (entry.isFile() && bashExtensions.some(ext => entry.name.endsWith(ext))) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
+  return findFilesByExtension(dir, BASH_EXTENSIONS, EXCLUDED_DIRS);
 }

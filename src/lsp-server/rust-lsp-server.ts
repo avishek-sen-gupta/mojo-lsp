@@ -1,9 +1,10 @@
 import { LSPClient } from '../lsp-client';
 import { Logger } from 'vscode-languageserver-protocol';
-import * as path from 'path';
-import * as fs from 'fs';
+import { findFilesByExtension } from './find-files';
 
 const SERVER_COMMAND = 'rust-analyzer';
+const RUST_EXTENSIONS = ['.rs'];
+const EXCLUDED_DIRS = ['target', 'node_modules', 'vendor'];
 
 export interface RustLspServerOptions {
   /** Root URI for the workspace (the Rust project directory) */
@@ -39,19 +40,5 @@ export function createRustLspClient(options: RustLspServerOptions): LSPClient {
  * Recursively find all Rust files in a directory.
  */
 export function findRustFiles(dir: string): string[] {
-  const files: string[] = [];
-
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory() && !entry.name.startsWith('.') &&
-        !['target', 'node_modules', 'vendor'].includes(entry.name)) {
-      files.push(...findRustFiles(fullPath));
-    } else if (entry.isFile() && entry.name.endsWith('.rs')) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
+  return findFilesByExtension(dir, RUST_EXTENSIONS, EXCLUDED_DIRS);
 }

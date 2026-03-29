@@ -1,10 +1,12 @@
 import { LSPClient } from '../lsp-client';
 import { Logger } from 'vscode-languageserver-protocol';
-import * as path from 'path';
 import * as fs from 'fs';
+import { findFilesByExtension } from './find-files';
 
 const SERVER_COMMAND = 'poetry';
 const DEFAULT_ARGS = ['-v'];
+const PYTHON_EXTENSIONS = ['.py'];
+const EXCLUDED_DIRS = ['node_modules', 'venv', '.venv', '__pycache__', 'build', 'dist'];
 
 export interface PythonLspServerOptions {
   /** Root URI for the workspace (the Python project directory) */
@@ -45,17 +47,5 @@ export function createPythonLspClient(options: PythonLspServerOptions): LSPClien
  * Recursively find all Python files in a directory.
  */
 export function findPythonFiles(dir: string): string[] {
-  const files: string[] = [];
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory() && !entry.name.startsWith('.') &&
-        !['node_modules', 'venv', '.venv', '__pycache__', 'build', 'dist'].includes(entry.name)) {
-      files.push(...findPythonFiles(fullPath));
-    } else if (entry.isFile() && entry.name.endsWith('.py')) {
-      files.push(fullPath);
-    }
-  }
-  return files;
+  return findFilesByExtension(dir, PYTHON_EXTENSIONS, EXCLUDED_DIRS);
 }

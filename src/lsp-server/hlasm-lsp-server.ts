@@ -1,7 +1,7 @@
 import { LSPClient } from '../lsp-client';
 import { Logger } from 'vscode-languageserver-protocol';
-import * as path from 'path';
 import * as fs from 'fs';
+import { findFilesByExtension } from './find-files';
 
 const SERVER_COMMAND = 'poetry';
 const HLASM_EXTENSIONS = ['.hlasm', '.asm', '.mac', '.copy', '.s'];
@@ -44,18 +44,5 @@ export function createHlasmLspClient(options: HlasmLspServerOptions): LSPClient 
  * Recursively find all HLASM files in a directory.
  */
 export function findHlasmFiles(dir: string): string[] {
-  const files: string[] = [];
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory() && !entry.name.startsWith('.') &&
-        !EXCLUDED_DIRS.includes(entry.name)) {
-      files.push(...findHlasmFiles(fullPath));
-    } else if (entry.isFile() && HLASM_EXTENSIONS.some(ext => entry.name.endsWith(ext))) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
+  return findFilesByExtension(dir, HLASM_EXTENSIONS, EXCLUDED_DIRS);
 }

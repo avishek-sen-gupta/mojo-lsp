@@ -1,9 +1,10 @@
 import { LSPClient } from '../lsp-client';
 import { Logger } from 'vscode-languageserver-protocol';
-import * as path from 'path';
-import * as fs from 'fs';
+import { findFilesByExtension } from './find-files';
 
 const SERVER_COMMAND = 'clojure-lsp';
+const CLOJURE_EXTENSIONS = ['.clj', '.cljs', '.cljc', '.edn'];
+const EXCLUDED_DIRS = ['node_modules', 'dist', 'build', 'out', 'target', '.cpcache'];
 
 export interface ClojureLspServerOptions {
   /** Root URI for the workspace */
@@ -37,20 +38,5 @@ export function createClojureLspClient(options: ClojureLspServerOptions): LSPCli
  * Recursively find all Clojure files in a directory.
  */
 export function findClojureFiles(dir: string): string[] {
-  const files: string[] = [];
-  const clojureExtensions = ['.clj', '.cljs', '.cljc', '.edn'];
-
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory() && !entry.name.startsWith('.') &&
-        !['node_modules', 'dist', 'build', 'out', 'target', '.cpcache'].includes(entry.name)) {
-      files.push(...findClojureFiles(fullPath));
-    } else if (entry.isFile() && clojureExtensions.some(ext => entry.name.endsWith(ext))) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
+  return findFilesByExtension(dir, CLOJURE_EXTENSIONS, EXCLUDED_DIRS);
 }

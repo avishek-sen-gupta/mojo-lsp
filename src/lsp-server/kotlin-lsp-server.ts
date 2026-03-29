@@ -1,10 +1,11 @@
 import { LSPClient } from '../lsp-client';
 import { Logger } from 'vscode-languageserver-protocol';
-import * as path from 'path';
-import * as fs from 'fs';
+import { findFilesByExtension } from './find-files';
 
 const SERVER_COMMAND = 'kotlin-lsp';
 const DEFAULT_ARGS = ['--stdio'];
+const KOTLIN_EXTENSIONS = ['.kt', '.kts'];
+const EXCLUDED_DIRS = ['node_modules', 'dist', 'build', 'out', 'target', '.gradle'];
 
 export interface KotlinLspServerOptions {
   /** Root URI for the workspace */
@@ -38,20 +39,5 @@ export function createKotlinLspClient(options: KotlinLspServerOptions): LSPClien
  * Recursively find all Kotlin files in a directory.
  */
 export function findKotlinFiles(dir: string): string[] {
-  const files: string[] = [];
-  const kotlinExtensions = ['.kt', '.kts'];
-
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory() && !entry.name.startsWith('.') &&
-        !['node_modules', 'dist', 'build', 'out', 'target', '.gradle'].includes(entry.name)) {
-      files.push(...findKotlinFiles(fullPath));
-    } else if (entry.isFile() && kotlinExtensions.some(ext => entry.name.endsWith(ext))) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
+  return findFilesByExtension(dir, KOTLIN_EXTENSIONS, EXCLUDED_DIRS);
 }

@@ -1,11 +1,12 @@
 import { LSPClient } from '../lsp-client';
 import { Logger } from 'vscode-languageserver-protocol';
-import * as path from 'path';
-import * as fs from 'fs';
 import { fileURLToPath } from 'url';
+import { findFilesByExtension } from './find-files';
 
 const SERVER_COMMAND = 'solargraph';
 const DEFAULT_ARGS = ['stdio'];
+const RUBY_EXTENSIONS = ['.rb'];
+const EXCLUDED_DIRS = ['node_modules', 'vendor', 'tmp', 'log'];
 
 export interface RubyLspServerOptions {
   /** Root URI for the workspace (the Ruby project directory) */
@@ -44,19 +45,5 @@ export function createRubyLspClient(options: RubyLspServerOptions): LSPClient {
  * Recursively find all Ruby files in a directory.
  */
 export function findRubyFiles(dir: string): string[] {
-  const files: string[] = [];
-
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory() && !entry.name.startsWith('.') &&
-        !['node_modules', 'vendor', 'tmp', 'log'].includes(entry.name)) {
-      files.push(...findRubyFiles(fullPath));
-    } else if (entry.isFile() && entry.name.endsWith('.rb')) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
+  return findFilesByExtension(dir, RUBY_EXTENSIONS, EXCLUDED_DIRS);
 }

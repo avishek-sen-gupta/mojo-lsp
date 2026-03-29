@@ -3,8 +3,11 @@ import { Logger } from 'vscode-languageserver-protocol';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as os from 'os';
+import { findFilesByExtension } from './find-files';
 
 const DEFAULT_SERVER_PATH = 'gopls';
+const GO_EXTENSIONS = ['.go'];
+const EXCLUDED_DIRS = ['node_modules', 'dist', 'build', 'out', 'vendor'];
 
 export interface GoLspServerOptions {
   /** Root URI for the workspace */
@@ -45,19 +48,5 @@ export function createGoLspClient(options: GoLspServerOptions): LSPClient {
  * Recursively find all Go files in a directory.
  */
 export function findGoFiles(dir: string): string[] {
-  const files: string[] = [];
-
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory() && !entry.name.startsWith('.') &&
-        !['node_modules', 'dist', 'build', 'out', 'vendor'].includes(entry.name)) {
-      files.push(...findGoFiles(fullPath));
-    } else if (entry.isFile() && entry.name.endsWith('.go')) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
+  return findFilesByExtension(dir, GO_EXTENSIONS, EXCLUDED_DIRS);
 }

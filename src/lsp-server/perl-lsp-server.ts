@@ -1,9 +1,11 @@
 import { LSPClient } from '../lsp-client';
 import { Logger } from 'vscode-languageserver-protocol';
-import * as path from 'path';
 import * as fs from 'fs';
+import { findFilesByExtension } from './find-files';
 
 const DEFAULT_ARGS = ['--stdio'];
+const PERL_EXTENSIONS = ['.pl', '.pm', '.t'];
+const EXCLUDED_DIRS = ['node_modules', 'blib', 'local'];
 
 export interface PerlLspServerOptions {
   /** Path to the PerlNavigator executable */
@@ -43,20 +45,5 @@ export function createPerlLspClient(options: PerlLspServerOptions): LSPClient {
  * Recursively find all Perl files in a directory.
  */
 export function findPerlFiles(dir: string): string[] {
-  const files: string[] = [];
-  const perlExtensions = ['.pl', '.pm', '.t'];
-
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory() && !entry.name.startsWith('.') &&
-        !['node_modules', 'blib', 'local'].includes(entry.name)) {
-      files.push(...findPerlFiles(fullPath));
-    } else if (entry.isFile() && perlExtensions.some(ext => entry.name.endsWith(ext))) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
+  return findFilesByExtension(dir, PERL_EXTENSIONS, EXCLUDED_DIRS);
 }

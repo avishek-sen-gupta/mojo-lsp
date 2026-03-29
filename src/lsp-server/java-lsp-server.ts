@@ -1,9 +1,10 @@
 import { LSPClient } from '../lsp-client';
 import { Logger } from 'vscode-languageserver-protocol';
-import * as path from 'path';
-import * as fs from 'fs';
+import { findFilesByExtension } from './find-files';
 
 const SERVER_COMMAND = 'jdtls';
+const JAVA_EXTENSIONS = ['.java'];
+const EXCLUDED_DIRS = ['node_modules', 'target', 'build', 'bin', '.gradle'];
 
 export interface JavaLspServerOptions {
   /** Root URI for the workspace (the Java project directory) */
@@ -38,18 +39,5 @@ export function createJavaLspClient(options: JavaLspServerOptions): LSPClient {
  * Recursively find all Java files in a directory.
  */
 export function findJavaFiles(dir: string): string[] {
-  const files: string[] = [];
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory() && !entry.name.startsWith('.') &&
-        !['node_modules', 'target', 'build', 'bin', '.gradle'].includes(entry.name)) {
-      files.push(...findJavaFiles(fullPath));
-    } else if (entry.isFile() && entry.name.endsWith('.java')) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
+  return findFilesByExtension(dir, JAVA_EXTENSIONS, EXCLUDED_DIRS);
 }

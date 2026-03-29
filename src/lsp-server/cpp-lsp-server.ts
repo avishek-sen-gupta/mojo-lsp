@@ -1,10 +1,11 @@
 import { LSPClient } from '../lsp-client';
 import { Logger } from 'vscode-languageserver-protocol';
-import * as path from 'path';
-import * as fs from 'fs';
+import { findFilesByExtension } from './find-files';
 
 const SERVER_COMMAND = 'clangd';
 const DEFAULT_ARGS = ['--log=error'];
+const CPP_EXTENSIONS = ['.cpp', '.cc', '.cxx', '.c', '.hpp', '.h', '.hxx'];
+const EXCLUDED_DIRS = ['build', 'cmake-build-debug', 'cmake-build-release', 'node_modules', 'third_party'];
 
 export interface CppLspServerOptions {
   /** Root URI for the workspace (the C++ project directory) */
@@ -43,20 +44,5 @@ export function createCppLspClient(options: CppLspServerOptions): LSPClient {
  * Recursively find all C/C++ files in a directory.
  */
 export function findCppFiles(dir: string): string[] {
-  const files: string[] = [];
-  const cppExtensions = ['.cpp', '.cc', '.cxx', '.c', '.hpp', '.h', '.hxx'];
-
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory() && !entry.name.startsWith('.') &&
-        !['build', 'cmake-build-debug', 'cmake-build-release', 'node_modules', 'third_party'].includes(entry.name)) {
-      files.push(...findCppFiles(fullPath));
-    } else if (entry.isFile() && cppExtensions.some(ext => entry.name.endsWith(ext))) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
+  return findFilesByExtension(dir, CPP_EXTENSIONS, EXCLUDED_DIRS);
 }
