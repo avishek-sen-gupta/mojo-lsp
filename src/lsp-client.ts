@@ -80,82 +80,93 @@ export class LSPClient {
   constructor(private options: LSPClientOptions) {}
 
   async start(): Promise<InitializeResult> {
-    let reader: StreamMessageReader;
-    let writer: StreamMessageWriter;
+    try {
+      const { reader, writer } = this.options.socket
+        ? await this.spawnViaSocket()
+        : this.spawnViaStdio();
 
-    if (this.options.socket) {
-      // Socket-based connection
-      const { port, host = 'localhost' } = this.options.socket;
+      this.initializeConnection(reader, writer);
 
-      // Spawn the server process first (it will listen on the socket)
-      this.process = spawn(this.options.serverCommand, this.options.serverArgs || [], {
-        stdio: ['pipe', 'pipe', 'pipe'],
-        cwd: this.options.cwd,
-      });
+      this.serverCapabilities = await this.connection!.sendRequest(
+        InitializeRequest.type,
+        this.buildInitializeParams()
+      );
 
-      // Log stderr for debugging
-      this.process.stderr?.on('data', (data) => {
-        if (this.options.logger) {
-          this.options.logger.error(`Server stderr: ${data.toString()}`);
-        }
-      });
+      this.connection!.sendNotification(InitializedNotification.type, {});
 
-      this.process.on('exit', (code) => {
-        if (this.options.logger) {
-          this.options.logger.info(`Server process exited with code ${code}`);
-        }
-      });
+      return this.serverCapabilities;
+    } catch (error) {
+      await this.cleanup();
+      throw error;
+    }
+  }
 
-      // Wait for the server to start listening
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+  private spawnViaStdio(): { reader: StreamMessageReader; writer: StreamMessageWriter } {
+    this.process = spawn(this.options.serverCommand, this.options.serverArgs || [], {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      cwd: this.options.cwd,
+    });
 
-      // Connect to the server via socket
-      this.socket = await new Promise<net.Socket>((resolve, reject) => {
-        const socket = net.createConnection({ port, host }, () => {
-          if (this.options.logger) {
-            this.options.logger.info(`Connected to server at ${host}:${port}`);
-          }
-          resolve(socket);
-        });
-        socket.on('error', (err) => {
-          reject(new Error(`Failed to connect to server at ${host}:${port}: ${err.message}`));
-        });
-      });
-
-      reader = new StreamMessageReader(this.socket);
-      writer = new StreamMessageWriter(this.socket);
-    } else {
-      // Stdio-based connection (default)
-      this.process = spawn(this.options.serverCommand, this.options.serverArgs || [], {
-        stdio: ['pipe', 'pipe', 'pipe'],
-        cwd: this.options.cwd,
-      });
-
-      if (!this.process.stdin || !this.process.stdout) {
-        throw new Error('Failed to create server process streams');
-      }
-
-      // Log stderr for debugging
-      this.process.stderr?.on('data', (data) => {
-        if (this.options.logger) {
-          this.options.logger.error(`Server stderr: ${data.toString()}`);
-        }
-      });
-
-      this.process.on('exit', (code) => {
-        if (this.options.logger) {
-          this.options.logger.info(`Server process exited with code ${code}`);
-        }
-      });
-
-      reader = new StreamMessageReader(this.process.stdout);
-      writer = new StreamMessageWriter(this.process.stdin);
+    if (!this.process.stdin || !this.process.stdout) {
+      throw new Error('Failed to create server process streams');
     }
 
-    // Create the protocol connection
+    this.attachProcessHandlers();
+
+    return {
+      reader: new StreamMessageReader(this.process.stdout),
+      writer: new StreamMessageWriter(this.process.stdin),
+    };
+  }
+
+  private async spawnViaSocket(): Promise<{ reader: StreamMessageReader; writer: StreamMessageWriter }> {
+    const { port, host = 'localhost' } = this.options.socket!;
+
+    this.process = spawn(this.options.serverCommand, this.options.serverArgs || [], {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      cwd: this.options.cwd,
+    });
+
+    this.attachProcessHandlers();
+
+    // Wait for the server to start listening
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    this.socket = await new Promise<net.Socket>((resolve, reject) => {
+      const socket = net.createConnection({ port, host }, () => {
+        if (this.options.logger) {
+          this.options.logger.info(`Connected to server at ${host}:${port}`);
+        }
+        resolve(socket);
+      });
+      socket.on('error', (err) => {
+        reject(new Error(`Failed to connect to server at ${host}:${port}: ${err.message}`));
+      });
+    });
+
+    return {
+      reader: new StreamMessageReader(this.socket),
+      writer: new StreamMessageWriter(this.socket),
+    };
+  }
+
+  private attachProcessHandlers(): void {
+    this.process?.stderr?.on('data', (data) => {
+      if (this.options.logger) {
+        this.options.logger.error(`Server stderr: ${data.toString()}`);
+      }
+    });
+
+    this.process?.on('exit', (code) => {
+      if (this.options.logger) {
+        this.options.logger.info(`Server process exited with code ${code}`);
+      }
+    });
+  }
+
+  private initializeConnection(reader: StreamMessageReader, writer: StreamMessageWriter): void {
     this.connection = createProtocolConnection(reader, writer, this.options.logger);
 
-    // Add error handlers
     this.connection.onError((error) => {
       if (this.options.logger) {
         this.options.logger.error(`Connection error: ${JSON.stringify(error)}`);
@@ -168,14 +179,12 @@ export class LSPClient {
       }
     });
 
-    // Set up notification handlers
     this.setupNotificationHandlers();
-
-    // Start listening
     this.connection.listen();
+  }
 
-    // Send initialize request
-    const initializeParams: InitializeParams = {
+  private buildInitializeParams(): InitializeParams {
+    return {
       processId: process.pid,
       rootUri: this.options.rootUri,
       capabilities: {
@@ -227,16 +236,6 @@ export class LSPClient {
         { uri: this.options.rootUri, name: 'workspace' },
       ],
     };
-
-    this.serverCapabilities = await this.connection.sendRequest(
-      InitializeRequest.type,
-      initializeParams
-    );
-
-    // Send initialized notification
-    this.connection.sendNotification(InitializedNotification.type, {});
-
-    return this.serverCapabilities;
   }
 
   private setupNotificationHandlers(): void {
@@ -440,50 +439,42 @@ export class LSPClient {
     }
 
     try {
-      // Send shutdown request
       await this.connection.sendRequest(ShutdownRequest.type);
-    } catch (error) {
+    } catch {
       // Server may have already exited
     }
 
-    // Give the server a moment to process shutdown
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    // For socket connections, the server typically closes the connection after shutdown
-    // So we skip the exit notification and just clean up
     if (!this.socket) {
       try {
-        // Send exit notification (only for stdio connections)
         this.connection.sendNotification(ExitNotification.type);
-      } catch (error) {
+      } catch {
         // Server may have already closed the connection
       }
     }
 
-    // Clean up socket first (if using socket connection)
+    await this.cleanup();
+  }
+
+  private async cleanup(): Promise<void> {
     if (this.socket) {
-      try {
-        this.socket.destroy();
-      } catch (error) {
-        // Socket may already be destroyed
-      }
+      try { this.socket.destroy(); } catch { /* socket may already be destroyed */ }
       this.socket = null;
     }
 
-    try {
-      this.connection.dispose();
-    } catch (error) {
-      // Connection may already be disposed
+    if (this.connection) {
+      try { this.connection.dispose(); } catch { /* connection may already be disposed */ }
+      this.connection = null;
     }
-    this.connection = null;
 
     if (this.process) {
-      try {
-        this.process.kill();
-      } catch (error) {
-        // Process may have already exited
-      }
+      try { this.process.kill(); } catch { /* process may have already exited */ }
       this.process = null;
     }
+
+    this.serverCapabilities = null;
+    this.openDocuments.clear();
+    this.diagnosticsHandler = null;
   }
 }
