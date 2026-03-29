@@ -77,7 +77,7 @@ describe('Clojure LSP', () => {
     const items = Array.isArray(completions) ? completions : completions?.items;
     expect(items).toBeDefined();
     // clojure-lsp may return empty completions in some contexts
-    expect(items!.length).toBeGreaterThanOrEqual(0);
+    expect(items!.length).toBeGreaterThan(0);
   });
 
   it('should provide document symbols', async () => {

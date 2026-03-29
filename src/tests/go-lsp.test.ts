@@ -75,7 +75,7 @@ func main() {
 
     const items = Array.isArray(completions) ? completions : completions?.items;
     expect(items).toBeDefined();
-    expect(items!.length).toBeGreaterThanOrEqual(0);
+    expect(items!.length).toBeGreaterThan(0);
   });
 
   it('should provide document symbols', async () => {

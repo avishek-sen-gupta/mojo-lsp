@@ -74,13 +74,13 @@ fun main() {
     const items = Array.isArray(completions) ? completions : completions?.items;
     expect(items).toBeDefined();
     // kotlin-lsp may return varying completions depending on context
-    expect(items!.length).toBeGreaterThanOrEqual(0);
+    expect(items!.length).toBeGreaterThan(0);
   });
 
   it('should provide document symbols', async () => {
     const symbols = await client.getDocumentSymbols(fileUri);
     expect(symbols).toBeDefined();
-    expect(symbols!.length).toBeGreaterThanOrEqual(0);
+    expect(symbols!.length).toBeGreaterThan(0);
   });
 
   it('should provide definition', async () => {
